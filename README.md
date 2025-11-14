@@ -1,6 +1,6 @@
 # Useful-Scripts
 Day to Day MongoDB scripts to help Automate tasks and track of improvements
-### Documentation for SetGuardRails Script with authentication.
+### Documentation for [SetGuardRails](https://github.com/adhiyanc/Useful-Scripts/blob/main/SetGuardRails_checkOpTime.js) Script with authentication.
 
 Overview
 This mongosh script automates the process of:
