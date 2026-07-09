@@ -15,7 +15,7 @@ Example : to generate `JSON` output and use the file to produce report with pred
 ./decode_ftdc.sh "<input_metric_file>" <filename>.json && python3 report.py
 ```
 
-# 2.  FTDC Metrics Reporter ( Python script ftdc_metrics_report_latest.py )
+# 2.  FTDC Metrics Reporter ( Python script ftdc_metrics_report_v5.py )
 
 ## Overview
 
