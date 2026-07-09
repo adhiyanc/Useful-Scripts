@@ -1,4 +1,4 @@
-1. # Bsondump method ( decode_ftdc.sh) and Ruby
+ # 1. Bsondump method ( decode_ftdc.sh) and Ruby
 
 ```
 ./[Script_Name] [input metric file] [output JSON file]
@@ -15,7 +15,7 @@ Example : to generate `JSON` output and use the file to produce report with pred
 ./decode_ftdc.sh "<input_metric_file>" <filename>.json && python3 report.py
 ```
 
-2. # FTDC Metrics Reporter ( Python script ftdc_metrics_report_latest.py )
+# 2.  FTDC Metrics Reporter ( Python script ftdc_metrics_report_latest.py )
 
 ## Overview
 
