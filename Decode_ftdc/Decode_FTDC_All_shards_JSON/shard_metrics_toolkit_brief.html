@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shard Metrics Toolkit Brief</title>
+  <style>
+    :root {
+      --artifact-background: var(--theme-background, #ffffff);
+      --artifact-background-light: var(--theme-background-light, #f6f6f6);
+      --artifact-background-mid: var(--theme-background-mid, #f0f0f0);
+      --artifact-border-light: var(--theme-border-light, #e5e5e5);
+      --artifact-border-dark: var(--theme-border-dark, #cccccc);
+      --artifact-text-primary: var(--theme-text-primary, #1b1b1b);
+      --artifact-text-secondary: var(--theme-text-secondary, #727272);
+      --artifact-primary-brand: var(--theme-primary-brand, #343ced);
+      --artifact-primary-highlight: var(--theme-primary-highlight, #1b1b1b);
+      --artifact-selected: var(--theme-selected, #e8e8e8);
+
+      --artifact-accent-indigo: #343ced;
+      --artifact-accent-olive: #82951e;
+      --artifact-accent-tangerine: #ef601b;
+      --artifact-accent-magenta: #dd2ca5;
+      --artifact-accent-amber: #cda515;
+
+      --artifact-accent-indigo-soft: #ececff;
+      --artifact-accent-olive-soft: #eef4d8;
+      --artifact-accent-tangerine-soft: #ffe6d8;
+      --artifact-accent-magenta-soft: #ffe0f5;
+      --artifact-accent-amber-soft: #fff3cf;
+
+      --artifact-shadow: 0 16px 42px rgba(17,24,39,0.10);
+      --artifact-shadow-soft: 0 8px 24px rgba(17,24,39,0.08);
+      --artifact-ring: rgba(52, 60, 237, 0.18);
+      --artifact-code-bg: #f6f3eb;
+      --artifact-code-text: #1b1b1b;
+    }
+    html[data-theme='dark'] {
+      --artifact-accent-indigo-soft: #1f245e;
+      --artifact-accent-olive-soft: #28351b;
+      --artifact-accent-tangerine-soft: #4a2518;
+      --artifact-accent-magenta-soft: #4d1f43;
+      --artifact-accent-amber-soft: #473a14;
+      --artifact-shadow: 0 16px 42px rgba(0,0,0,0.28);
+      --artifact-shadow-soft: 0 8px 24px rgba(0,0,0,0.20);
+      --artifact-code-bg: #202020;
+      --artifact-code-text: #f5f5f5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      line-height: 1.5;
+    }
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      padding: 28px;
+      border-radius: 28px;
+      border: 1px solid var(--artifact-border-light);
+      background: linear-gradient(135deg, var(--artifact-background-light), var(--artifact-accent-indigo-soft));
+      box-shadow: var(--artifact-shadow);
+    }
+    .eyebrow, .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      color: var(--artifact-text-secondary);
+      font-size: 13px;
+    }
+    h1 {
+      margin: 14px 0 10px;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--artifact-text-secondary);
+      max-width: 62ch;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .stat {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      box-shadow: var(--artifact-shadow-soft);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .stat:hover { transform: translateY(-3px); box-shadow: var(--artifact-shadow); }
+    .stat .kicker { color: var(--artifact-text-secondary); font-size: .82rem; margin-bottom: 6px; }
+    .stat .value { font-size: 1.85rem; font-weight: 700; letter-spacing: -0.04em; }
+    .panel, .step, details, .card {
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      border-radius: 22px;
+      box-shadow: var(--artifact-shadow-soft);
+    }
+    .stack { display: grid; gap: 14px; }
+    .section { margin-top: 22px; }
+    .section h2 { margin: 0 0 8px; font-size: 1.45rem; letter-spacing: -0.03em; }
+    .section p.lead { margin: 0 0 14px; color: var(--artifact-text-secondary); }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 12px;
+    }
+    .step {
+      padding: 16px;
+      min-height: 170px;
+      position: relative;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .step:hover { transform: translateY(-4px); box-shadow: var(--artifact-shadow); }
+    .step::after {
+      content: '→';
+      position: absolute;
+      right: -9px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px; height: 22px;
+      border-radius: 999px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--artifact-background);
+      border: 1px solid var(--artifact-border-light);
+      color: var(--artifact-text-secondary);
+    }
+    .step:last-child::after { display: none; }
+    .num {
+      width: 30px; height: 30px; border-radius: 10px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 700; margin-bottom: 12px;
+      background: var(--artifact-accent-indigo-soft);
+      color: var(--artifact-text-primary);
+    }
+    .step h3 { margin: 0 0 8px; font-size: .98rem; }
+    .step p { margin: 0; color: var(--artifact-text-secondary); font-size: .88rem; }
+    .grid2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 16px;
+    }
+    .card { padding: 18px; }
+    .card h3 { margin: 0 0 10px; font-size: 1.04rem; }
+    .list { display: grid; gap: 10px; }
+    .list-item {
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background-light);
+    }
+    .list-item strong { display: block; margin-bottom: 4px; font-size: .9rem; }
+    .list-item span { color: var(--artifact-text-secondary); font-size: .84rem; }
+    details summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 600;
+    }
+    details summary::-webkit-details-marker { display: none; }
+    details .body { padding: 0 20px 20px; color: var(--artifact-text-secondary); }
+    details .body ul { margin: 0; padding-left: 18px; }
+    details .body p { margin: 0 0 10px; }
+    code, pre { font-family: "SFMono-Regular", SFMono-Regular, Consolas, Menlo, monospace; }
+    .code {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-code-bg);
+      color: var(--artifact-code-text);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: .86rem;
+      line-height: 1.45;
+    }
+    .barbox { display: grid; gap: 8px; }
+    .bar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: var(--artifact-background-mid);
+      overflow: hidden;
+      border: 1px solid var(--artifact-border-light);
+    }
+    .bar-fill {
+      width: 0;
+      height: 100%;
+      border-radius: 999px;
+      background: var(--fill, var(--artifact-accent-indigo));
+      transition: width 1s cubic-bezier(.2,.8,.2,1);
+    }
+    .legend { display: flex; justify-content: space-between; color: var(--artifact-text-secondary); font-size: .82rem; }
+    .footer {
+      margin-top: 22px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--artifact-border-light);
+      background: linear-gradient(180deg, var(--artifact-background), var(--artifact-background-light));
+      box-shadow: var(--artifact-shadow-soft);
+    }
+    .fade { opacity: 0; transform: translateY(10px); animation: rise .55s ease forwards; }
+    .d1 { animation-delay: .08s; }
+    .d2 { animation-delay: .16s; }
+    .d3 { animation-delay: .24s; }
+    .d4 { animation-delay: .32s; }
+    @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+    :focus-visible { outline: 3px solid var(--artifact-ring); outline-offset: 3px; border-radius: 14px; }
+    @media screen and (max-width: 980px) {
+      .hero, .grid2, .flow { grid-template-columns: 1fr; }
+      .step::after { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .fade { opacity: 1; transform: none; }
+    }
+    @media print {
+      body {
+        margin: 0;
+        padding: 0.4in 0.6in;
+        background: #fff;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      .container, .dashboard, .shell, main {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      [style*="position:sticky"], [style*="position: sticky"],
+      [class*="topbar"], [class*="navbar"], [class*="header"][class*="sticky"] {
+        position: static !important;
+      }
+      section, [class*="section"], .header {
+        break-inside: avoid;
+        margin-bottom: 20px !important;
+      }
+      [class*="card"], [class*="Card"] {
+        break-inside: avoid;
+        padding: 18px !important;
+        box-shadow: none !important;
+        border: 1px solid rgba(0,0,0,0.08);
+      }
+      [class*="grid"], [class*="row"] {
+        gap: 10px !important;
+        margin-bottom: 20px !important;
+      }
+      [class*="chart"], [class*="Chart"] {
+        break-inside: avoid;
+        height: 240px !important;
+      }
+      [class*="chart"][class*="tall"], [class*="Chart"][class*="tall"],
+      [class*="chart"][class*="full"], [class*="Chart"][class*="full"] {
+        height: 280px !important;
+      }
+      table, thead, .funnel, .heatmap, .list, .goals {
+        break-inside: avoid;
+      }
+      [class*="quote-list"], [class*="scroll"],
+      [style*="max-height"], [style*="overflow"] {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+      [class*="tab-panel"], [class*="tabpanel"] {
+        display: block !important;
+      }
+      [class*="tab-bar"], [class*="tabs"]:not([class*="panel"]) {
+        display: none !important;
+      }
+      [class*="fade"], [class*="animate"], [class*="slide"] {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+      button, [role="button"], .interactive-only {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero fade d1">
+      <div>
+        <div class="eyebrow">Interactive brief • shard metrics toolkit</div>
+        <h1>One script orchestrates the collection. One helper decodes FTDC on each host.</h1>
+        <p>Together these scripts collect FTDC-derived opcounter deltas across many shards, move the work to the remote host over SSH, and export both raw JSON and flattened CSV for analysis.</p>
+        <div class="stats">
+          <div class="stat"><div class="kicker">Scripts</div><div class="value">2</div></div>
+          <div class="stat"><div class="kicker">Primary modes</div><div class="value">SSH + FTDC</div></div>
+          <div class="stat"><div class="kicker">Combined outputs</div><div class="value">JSON + CSV</div></div>
+          <div class="stat"><div class="kicker">Target metrics</div><div class="value">6 opcounters</div></div>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="panel" style="padding:18px;">
+          <div class="tag">Script A</div>
+          <h3 style="margin:10px 0 8px;">Orchestrator</h3>
+          <p style="margin:0;color:var(--artifact-text-secondary);">Reads PRIMARY_TARGETS, validates the requested window, streams the decoder over SSH, and writes per-shard plus combined outputs.</p>
+        </div>
+        <div class="panel" style="padding:18px;">
+          <div class="tag">Script B</div>
+          <h3 style="margin:10px 0 8px;">Decode helper</h3>
+          <p style="margin:0;color:var(--artifact-text-secondary);">Runs on a single host, parses MongoDB FTDC metrics files, reconstructs values from delta-encoded chunks, and returns first/last/delta for selected opcounters.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section fade d2">
+      <h2>End-to-end workflow</h2>
+      <p class="lead">This is the combined operator flow across both scripts.</p>
+      <div class="flow">
+        <article class="step"><div class="num">1</div><h3>Set targets</h3><p>The orchestrator reads shard and host pairs from PRIMARY_TARGETS.</p></article>
+        <article class="step"><div class="num">2</div><h3>Pass time window</h3><p>You supply start, end, and dir-prefix to the orchestrator. It validates them before any remote work starts.</p></article>
+        <article class="step"><div class="num">3</div><h3>Stream helper</h3><p>The orchestrator sends the decode helper to each host over SSH and runs python3 - with shard, directory, start, and end arguments.</p></article>
+        <article class="step"><div class="num">4</div><h3>Decode FTDC</h3><p>The helper selects relevant metrics.* files, decompresses chunks, reconstructs sample series, and extracts six opcounter metrics inside the requested window.</p></article>
+        <article class="step"><div class="num">5</div><h3>Aggregate outputs</h3><p>The orchestrator saves per-shard JSON, writes all_shards.json, and flattens the metric summaries into all_shards.csv.</p></article>
+      </div>
+    </section>
+
+    <section class="section fade d3">
+      <h2>Role split</h2>
+      <p class="lead">Use this as the mental model when operating or debugging the toolkit.</p>
+      <div class="grid2">
+        <div class="card">
+          <h3>Orchestrator responsibilities</h3>
+          <div class="list">
+            <div class="list-item"><strong>Target fan-out</strong><span>Runs one worker per shard/host target.</span></div>
+            <div class="list-item"><strong>Remote execution</strong><span>Uses SSH and python3 on the remote side.</span></div>
+            <div class="list-item"><strong>Result persistence</strong><span>Saves per-shard JSON plus combined JSON and CSV outputs.</span></div>
+            <div class="list-item"><strong>Failure capture</strong><span>Records returncode, stdout, stderr, and worker exceptions.</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Decode helper responsibilities</h3>
+          <div class="list">
+            <div class="list-item"><strong>File discovery</strong><span>Finds metrics.&lt;timestamp&gt;Z-&lt;n&gt; files and selects only the relevant time slice.</span></div>
+            <div class="list-item"><strong>FTDC decoding</strong><span>Parses BSON, inflates zlib chunks, expands deltas, and rebuilds time series.</span></div>
+            <div class="list-item"><strong>Metric extraction</strong><span>Reports first value, last value, first/last sample time, and delta for six opcounters.</span></div>
+            <div class="list-item"><strong>Structured output</strong><span>Prints a single JSON object to stdout for the orchestrator to ingest.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section fade d3">
+      <h2>Inputs and outputs</h2>
+      <p class="lead">The two scripts share a clean handoff: the orchestrator passes arguments, the helper returns JSON.</p>
+      <div class="grid2">
+        <details open>
+          <summary>Inputs</summary>
+          <div class="body">
+            <p>Operator-facing inputs:</p>
+            <ul>
+              <li>PRIMARY_TARGETS: Python-style list of (shard, host) pairs</li>
+              <li>--start and --end: inclusive time window</li>
+              <li>--dir-prefix: absolute path prefix on each remote host</li>
+            </ul>
+            <div class="code">export PRIMARY_TARGETS="[('shard01','host1.example.com'),('shard02','host2.example.com')]"
+
+python3 collect_metrics.py \
+  --start 2026-07-07T10:00:00Z \
+  --end 2026-07-07T11:00:00Z \
+  --dir-prefix /d/d3/sem2/qa</div>
+          </div>
+        </details>
+        <details>
+          <summary>Outputs</summary>
+          <div class="body">
+            <p>Main artifacts written by the orchestrator:</p>
+            <ul>
+              <li>shard_outputs/&lt;shard&gt;.json</li>
+              <li>shard_outputs/all_shards.json</li>
+              <li>shard_outputs/all_shards.csv</li>
+            </ul>
+            <p>The helper returns matched sample count, selected metrics files, and per-metric first/last/delta values for the target opcounters.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="section fade d4">
+      <h2>Coverage of the helper output</h2>
+      <p class="lead">These bars reflect what the helper contributes to the full pipeline.</p>
+      <div class="grid2">
+        <div class="card">
+          <h3 style="margin-top:0;">Metrics returned</h3>
+          <div class="barbox">
+            <div class="bar-track"><div class="bar-fill" data-width="100%" style="--fill:var(--artifact-accent-indigo);"></div></div>
+            <div class="legend"><span>Target metrics</span><span>6 / 6</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">Remote integration</h3>
+          <div class="barbox">
+            <div class="bar-track"><div class="bar-fill" data-width="88%" style="--fill:var(--artifact-accent-olive);"></div></div>
+            <div class="legend"><span>Designed for ssh python3 - flow</span><span>stdout JSON</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">Time-window filtering</h3>
+          <div class="barbox">
+            <div class="bar-track"><div class="bar-fill" data-width="84%" style="--fill:var(--artifact-accent-tangerine);"></div></div>
+            <div class="legend"><span>Relevant metrics files only</span><span>start to end slice</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">Failure visibility</h3>
+          <div class="barbox">
+            <div class="bar-track"><div class="bar-fill" data-width="82%" style="--fill:var(--artifact-accent-magenta);"></div></div>
+            <div class="legend"><span>JSON error propagation</span><span>captured by orchestrator</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section fade d4">
+      <h2>Where to debug</h2>
+      <p class="lead">A quick decision tree for common failures.</p>
+      <div class="grid2">
+        <details>
+          <summary>The orchestrator fails before SSH</summary>
+          <div class="body">
+            <ul>
+              <li>Check PRIMARY_TARGETS syntax</li>
+              <li>Check start and end format</li>
+              <li>Confirm dir-prefix is absolute</li>
+            </ul>
+          </div>
+        </details>
+        <details>
+          <summary>The helper returns no metrics files</summary>
+          <div class="body">
+            <ul>
+              <li>Confirm the remote path points to diagnostic.data</li>
+              <li>Confirm files match metrics.&lt;timestamp&gt;Z-&lt;n&gt;</li>
+            </ul>
+          </div>
+        </details>
+        <details>
+          <summary>Remote stdout was not valid JSON</summary>
+          <div class="body">
+            <ul>
+              <li>The helper should print only JSON on stdout</li>
+              <li>Inspect saved per-shard stdout/stderr in shard_outputs/&lt;shard&gt;.json</li>
+            </ul>
+          </div>
+        </details>
+        <details>
+          <summary>The CSV is empty</summary>
+          <div class="body">
+            <ul>
+              <li>No samples matched the requested window</li>
+              <li>Or none of the six target opcounter metrics were present</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <div class="footer fade d4">
+      <strong>Bottom line:</strong> treat the orchestrator as the fleet runner and the helper as the FTDC-aware metric extractor. If the helper JSON is good, the aggregate outputs should be straightforward.
+    </div>
+  </main>
+
+  <script>
+    document.querySelectorAll('.bar-fill').forEach(function(el) {
+      requestAnimationFrame(function() {
+        el.style.width = el.getAttribute('data-width') || '0%';
+      });
+    });
+
+    window.GleanBridge.postMessage({
+      actionId: 'export-pdf',
+      type: 'glean-add-menu',
+      metadata: { label: 'Export as PDF', icon: 'export' }
+    });
+    window.GleanBridge.onMessage('action', function(data) {
+      if (data.actionId === 'export-pdf') window.print();
+    });
+
+    function prepareChartsForPrint() {
+      document.querySelectorAll('[_echarts_instance_]').forEach(function(el) {
+        var chart = echarts.getInstanceByDom(el);
+        if (!chart) return;
+        var img = new Image();
+        img.src = chart.getDataURL({ type: 'png', pixelRatio: 2 });
+        img.className = 'print-chart-img';
+        img.style.cssText = 'width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;z-index:10;';
+        el.dataset.prevPosition = el.style.position;
+        el.style.position = 'relative';
+        el.appendChild(img);
+      });
+    }
+    function cleanUpAfterPrint() {
+      document.querySelectorAll('[_echarts_instance_]').forEach(function(el) {
+        var img = el.querySelector('.print-chart-img');
+        if (!img) return;
+        img.remove();
+        el.style.position = el.dataset.prevPosition || '';
+        delete el.dataset.prevPosition;
+      });
+    }
+    window.addEventListener('beforeprint', prepareChartsForPrint);
+    window.addEventListener('afterprint', cleanUpAfterPrint);
+  </script>
+</body>
+</html>
