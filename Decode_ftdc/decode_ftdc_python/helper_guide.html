@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FTDC Metrics Reporter Infographic</title>
+  <style>
+    :root {
+      --artifact-background: #ffffff;
+      --artifact-background-light: #f1f3f6;
+      --artifact-background-mid: #e9ecf1;
+      --artifact-border-light: #e3e6ec;
+      --artifact-border-dark: #cdd2db;
+      --artifact-primary-brand: #3559e6;
+      --artifact-primary-highlight: #0d0f14;
+      --artifact-primary-hover: #2442b8;
+      --artifact-selected: #eaeefc;
+      --artifact-text-primary: #11141a;
+      --artifact-text-secondary: #5c6470;
+      --artifact-text-highlight: #e8eefc;
+      --artifact-positive-background: #e8f6ee;
+      --artifact-positive-text: #11141a;
+      --artifact-positive: #159a6a;
+      --artifact-negative: #dc4c4c;
+      --artifact-warning: #9a6700;
+    }
+    html[data-theme='dark'] {
+      --artifact-background: #0a0b0e;
+      --artifact-background-light: #121419;
+      --artifact-background-mid: #181b22;
+      --artifact-border-light: #23262e;
+      --artifact-border-dark: #343844;
+      --artifact-primary-brand: #6a92ff;
+      --artifact-primary-highlight: #f5f7fb;
+      --artifact-primary-hover: #88a8ff;
+      --artifact-selected: #1a2030;
+      --artifact-text-primary: #eef0f4;
+      --artifact-text-secondary: #9aa0ad;
+      --artifact-text-highlight: #14213d;
+      --artifact-positive-background: #0e2a1d;
+      --artifact-positive-text: #c8f5da;
+      --artifact-positive: #46d39a;
+      --artifact-negative: #ff6b6b;
+      --artifact-warning: #ffcc66;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      letter-spacing: -0.005em;
+    }
+    a { color: var(--artifact-primary-brand); text-decoration: none; }
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 24px 80px;
+    }
+    .eyebrow, .mini-label, th, .chip {
+      font-family: "SF Mono", "IBM Plex Mono", "Cascadia Code", "Consolas", monospace;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--artifact-text-secondary);
+    }
+    h1, h2, h3 {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--artifact-text-primary);
+    }
+    h1 { font-size: clamp(2.8rem, 7vw, 5rem); font-weight: 300; }
+    h2 { font-size: clamp(1.65rem, 4vw, 2.8rem); font-weight: 400; }
+    h3 { font-size: 1.2rem; font-weight: 500; }
+    p { margin: 0; color: var(--artifact-text-secondary); }
+    .hero {
+      padding: 28px 0 48px;
+      border-bottom: 1px solid var(--artifact-border-light);
+      display: grid;
+      grid-template-columns: 1.25fr 0.9fr;
+      gap: 28px;
+      align-items: end;
+    }
+    .hero-copy { display: grid; gap: 18px; }
+    .hero p.lead {
+      max-width: 60ch;
+      font-size: 1.05rem;
+      color: var(--artifact-text-secondary);
+    }
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+    }
+    .stat {
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background-light);
+      padding: 16px;
+      border-radius: 8px;
+      min-height: 124px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+    .stat .value {
+      font-weight: 300;
+      font-size: clamp(2.1rem, 4vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--artifact-text-primary);
+    }
+    .stat p { font-size: 0.95rem; }
+    .layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0,1fr);
+      gap: 32px;
+      margin-top: 24px;
+    }
+    .toc {
+      position: sticky;
+      top: 20px;
+      align-self: start;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background-light);
+      border-radius: 8px;
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+    .toc a {
+      display: block;
+      padding: 8px 10px;
+      border-radius: 6px;
+      color: var(--artifact-text-secondary);
+      border: 1px solid transparent;
+    }
+    .toc a:hover, .toc a.active {
+      background: var(--artifact-selected);
+      color: var(--artifact-text-primary);
+      border-color: var(--artifact-border-light);
+    }
+    .content {
+      display: grid;
+      gap: 48px;
+    }
+    section { scroll-margin-top: 24px; display: grid; gap: 18px; }
+    .section-head { display: grid; gap: 10px; max-width: 70ch; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+    .card {
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background-light);
+      border-radius: 8px;
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+    .flow-step {
+      position: relative;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background-light);
+      border-radius: 8px;
+      padding: 16px 16px 16px 54px;
+    }
+    .flow-step::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--artifact-selected);
+      color: var(--artifact-primary-brand);
+      font-family: "SF Mono", "IBM Plex Mono", monospace;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--artifact-border-light);
+    }
+    .flow-arrow {
+      margin-left: 27px;
+      width: 2px;
+      height: 20px;
+      background: var(--artifact-border-dark);
+    }
+    .mode-switch {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .mode-switch button {
+      appearance: none;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      color: var(--artifact-text-secondary);
+      border-radius: 999px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .mode-switch button.active {
+      background: var(--artifact-selected);
+      color: var(--artifact-text-primary);
+      border-color: var(--artifact-border-dark);
+    }
+    .panel {
+      display: none;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background-light);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .panel.active { display: grid; gap: 12px; }
+    .code-block {
+      font-family: "SF Mono", "IBM Plex Mono", "Consolas", monospace;
+      font-size: 13px;
+      padding: 14px;
+      border-radius: 8px;
+      background: var(--artifact-background-mid);
+      color: var(--artifact-text-primary);
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border: 1px solid var(--artifact-border-light);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-spacing: 0;
+      overflow: hidden;
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 8px;
+      background: var(--artifact-background);
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--artifact-border-light);
+      vertical-align: top;
+    }
+    th {
+      color: var(--artifact-text-secondary);
+      background: var(--artifact-background-light);
+    }
+    td { color: var(--artifact-text-primary); }
+    tbody tr:last-child td { border-bottom: 0; }
+    .metric-family {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .metric-family ul, .card ul, .panel ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--artifact-text-secondary);
+    }
+    .metric-family li, .card li, .panel li { margin: 4px 0; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      color: var(--artifact-text-secondary);
+      font-size: 13px;
+    }
+    .callout {
+      padding: 16px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-text-highlight);
+      color: var(--artifact-text-primary);
+    }
+    .warning {
+      background: var(--artifact-background-light);
+      border-left: 0;
+      position: relative;
+    }
+    .warning strong { color: var(--artifact-text-primary); }
+    .small { font-size: 0.92rem; }
+    .footer-note {
+      padding-top: 18px;
+      border-top: 1px solid var(--artifact-border-light);
+      color: var(--artifact-text-secondary);
+      font-size: 0.92rem;
+    }
+    @media screen and (max-width: 920px) {
+      .hero, .layout, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .toc { position: static; }
+      .hero-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media screen and (max-width: 620px) {
+      .page { padding: 20px 16px 64px; }
+      .hero-stats { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body {
+        margin: 0;
+        padding: 0.4in 0.6in;
+        background: #fff;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      .page, .layout, .content {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      .toc {
+        position: static !important;
+      }
+      section, .hero, .card, .flow-step, table {
+        break-inside: avoid;
+        margin-bottom: 20px !important;
+      }
+      .grid-2, .grid-3 {
+        gap: 10px !important;
+        margin-bottom: 20px !important;
+      }
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+      button { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero" id="top">
+      <div class="hero-copy">
+        <div class="eyebrow">MongoDB FTDC reporter</div>
+        <h1>One Python script to decode raw FTDC and print a usable performance report.</h1>
+        <p class="lead">This script reads raw <span class="mono">metrics.*</span> files or a full <span class="mono">diagnostic.data</span> directory, decompresses FTDC type 1 chunks in pure Python, extracts only the fields it needs, and prints an operator-friendly report covering op counts, latencies, memory, CPU, and WiredTiger cache behavior.</p>
+        <div class="pill-row">
+          <div class="pill">No bsondump</div>
+          <div class="pill">Raw FTDC support</div>
+          <div class="pill">Decoded JSON fallback</div>
+          <div class="pill">Markdown table output</div>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="mini-label">Input modes</div>
+          <div class="value">3</div>
+          <p>Single <span class="mono">metrics.*</span> file, full <span class="mono">diagnostic.data</span> directory, or pre-decoded JSON snapshots.</p>
+        </div>
+        <div class="stat">
+          <div class="mini-label">Latency unit</div>
+          <div class="value">ms</div>
+          <p>MongoDB stores cumulative op latency in microseconds, but the report converts per-op latency to milliseconds for readability.</p>
+        </div>
+        <div class="stat">
+          <div class="mini-label">CPU view</div>
+          <div class="value">norm</div>
+          <p>Reports aggregate CPU percentages plus normalized per-core user, system, total, and iowait when FTDC CPU counters are present.</p>
+        </div>
+        <div class="stat">
+          <div class="mini-label">Cache view</div>
+          <div class="value">WT</div>
+          <p>Summarizes cache occupancy, fill ratio, dirty bytes, and bytes read into / written from WiredTiger cache during the window.</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav class="toc" aria-label="Table of contents">
+        <div class="eyebrow">Contents</div>
+        <a href="#what-it-does">What it does</a>
+        <a href="#inputs">Input modes</a>
+        <a href="#pipeline">Decode pipeline</a>
+        <a href="#metrics">Metrics reported</a>
+        <a href="#formulas">How key calculations work</a>
+        <a href="#usage">Usage</a>
+        <a href="#limits">Limits and caveats</a>
+      </nav>
+
+      <div class="content">
+        <section id="what-it-does">
+          <div class="section-head">
+            <div class="eyebrow">What it does</div>
+            <h2>It replaces the awkward two-step FTDC workflow with one CLI entry point.</h2>
+            <p>The script combines FTDC decoding and report generation. For raw FTDC it parses BSON, inflates compressed type 1 chunks, reconstructs sample deltas, flattens only the target paths, then prints a Markdown-style report. For decoded JSON it follows the same summary path for parity.</p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Why it exists</h3>
+              <ul>
+                <li><span class="mono">bsondump</span> alone does not fully solve FTDC metric-chunk decoding.</li>
+                <li>Operators usually want a quick, readable window summary rather than raw samples.</li>
+                <li>The script keeps the workflow local, dependency-light, and repeatable.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>What it prints</h3>
+              <ul>
+                <li>timeframe summary and sample cadence</li>
+                <li>opcounter deltas</li>
+                <li>op latency throughput and averages</li>
+                <li>memory, CPU, and page-fault metrics</li>
+                <li>WiredTiger cache occupancy and flow</li>
+                <li>snapshot envelope boundaries</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="inputs">
+          <div class="section-head">
+            <div class="eyebrow">Input modes</div>
+            <h2>One interface, three supported sources.</h2>
+            <p>Use the same script against raw FTDC archives or already-expanded JSON snapshots. Switch between the modes below.</p>
+          </div>
+          <div class="mode-switch" role="tablist" aria-label="Input modes">
+            <button class="active" data-target="mode-raw-file" role="tab" aria-selected="true">Single metrics file</button>
+            <button data-target="mode-dir" role="tab" aria-selected="false">diagnostic.data directory</button>
+            <button data-target="mode-json" role="tab" aria-selected="false">Decoded JSON</button>
+          </div>
+          <div id="mode-raw-file" class="panel active" role="tabpanel">
+            <h3>Single raw metrics file</h3>
+            <p>Point the script directly at one <span class="mono">metrics.&lt;timestamp&gt;-00000</span> file. It reads outer BSON documents, selects type 1 docs, decompresses chunk payloads, and reconstructs metric samples.</p>
+            <div class="code-block">python3 ftdc_metrics_report.py /path/to/metrics.2026-05-11T04-19-11Z-00000</div>
+          </div>
+          <div id="mode-dir" class="panel" role="tabpanel">
+            <h3>diagnostic.data directory</h3>
+            <p>Point the script at the directory. It sorts all <span class="mono">metrics.*</span> files, skips <span class="mono">metrics.interim</span>, and processes the archive as one continuous stream.</p>
+            <div class="code-block">python3 ftdc_metrics_report.py /path/to/diagnostic.data</div>
+          </div>
+          <div id="mode-json" class="panel" role="tabpanel">
+            <h3>Decoded JSON snapshots</h3>
+            <p>Use this for parity testing or when you already have concatenated JSON snapshots. The script auto-detects <span class="mono">.json</span> input, or you can force it with <span class="mono">--decoded-json</span>.</p>
+            <div class="code-block">python3 ftdc_metrics_report.py /path/to/xaa.json
+python3 ftdc_metrics_report.py /path/to/snapshots.txt --decoded-json</div>
+          </div>
+        </section>
+
+        <section id="pipeline">
+          <div class="section-head">
+            <div class="eyebrow">Decode pipeline</div>
+            <h2>From raw FTDC chunk to report row.</h2>
+            <p>The raw path is intentionally narrow: it only reconstructs the metric fields needed for the report, which keeps it efficient and easier to reason about.</p>
+          </div>
+          <div class="flow">
+            <div class="flow-step" data-step="1">
+              <h3>Enumerate inputs</h3>
+              <p>If the input is a directory, gather sorted <span class="mono">metrics.*</span> files and skip <span class="mono">metrics.interim</span>. Otherwise process the single file as-is.</p>
+            </div>
+            <div class="flow-arrow"></div>
+            <div class="flow-step" data-step="2">
+              <h3>Decode outer BSON documents</h3>
+              <p>A minimal built-in BSON decoder walks the file and yields outer FTDC docs without requiring external packages.</p>
+            </div>
+            <div class="flow-arrow"></div>
+            <div class="flow-step" data-step="3">
+              <h3>Keep only type 1 metric chunks</h3>
+              <p>Non-type-1 docs are ignored on the raw path. For each type 1 doc, the script reads the raw binary <span class="mono">data</span> payload.</p>
+            </div>
+            <div class="flow-arrow"></div>
+            <div class="flow-step" data-step="4">
+              <h3>Inflate and reconstruct deltas</h3>
+              <p>The first 4 bytes are skipped, the remaining payload is zlib-inflated, the reference BSON document is decoded, and the varint delta stream is replayed across all metrics.</p>
+            </div>
+            <div class="flow-arrow"></div>
+            <div class="flow-step" data-step="5">
+              <h3>Flatten only target paths</h3>
+              <p>The script keeps a fixed target-path list for timestamps, opcounters, opLatencies, memory, extra_info, WiredTiger cache fields, and CPU aliases.</p>
+            </div>
+            <div class="flow-arrow"></div>
+            <div class="flow-step" data-step="6">
+              <h3>Build window summary</h3>
+              <p>Sample rows are summarized into timeframe, delta, throughput, average, and cache/CPU ratios, then printed as Markdown-style tables.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="metrics">
+          <div class="section-head">
+            <div class="eyebrow">Metrics reported</div>
+            <h2>The report is organized around the metrics most useful in a support-style performance review.</h2>
+            <p>Each family below maps directly to fields extracted by the script.</p>
+          </div>
+          <div class="grid-3">
+            <div class="card metric-family">
+              <h3>Window summary</h3>
+              <ul>
+                <li>complete snapshots parsed</li>
+                <li>start and end timestamps</li>
+                <li>elapsed time</li>
+                <li>average sample interval</li>
+                <li>first/last snapshot envelope boundaries</li>
+              </ul>
+            </div>
+            <div class="card metric-family">
+              <h3>Operation counts</h3>
+              <ul>
+                <li>insert</li>
+                <li>query</li>
+                <li>update</li>
+                <li>delete</li>
+                <li>getmore</li>
+                <li>command</li>
+                <li>total delta across all counters</li>
+              </ul>
+            </div>
+            <div class="card metric-family">
+              <h3>Operation latencies</h3>
+              <ul>
+                <li>reads, writes, commands, transactions</li>
+                <li>ops in window</li>
+                <li>throughput in ops/s</li>
+                <li>average latency in window (ms)</li>
+                <li>lifetime average latency (ms)</li>
+              </ul>
+            </div>
+            <div class="card metric-family">
+              <h3>Memory</h3>
+              <ul>
+                <li>resident memory (MiB)</li>
+                <li>virtual memory (MiB)</li>
+                <li>page faults cumulative</li>
+                <li>page faults during window</li>
+              </ul>
+            </div>
+            <div class="card metric-family">
+              <h3>CPU</h3>
+              <ul>
+                <li>total, user, system, iowait (%)</li>
+                <li>normalized per-core total/user/system/iowait (%)</li>
+                <li>detected core count</li>
+                <li>context switches cumulative, delta, and avg/s</li>
+              </ul>
+            </div>
+            <div class="card metric-family">
+              <h3>WiredTiger cache</h3>
+              <ul>
+                <li>configured cache size</li>
+                <li>bytes currently in cache</li>
+                <li>cache fill ratio (%)</li>
+                <li>dirty bytes and dirty ratio (%)</li>
+                <li>bytes read into / written from cache during window</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="formulas">
+          <div class="section-head">
+            <div class="eyebrow">How key calculations work</div>
+            <h2>The script turns cumulative counters into window metrics.</h2>
+            <p>These are the core interpretations behind the report output.</p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Latency</h3>
+              <div class="code-block">window_avg_latency_ms = (last_latency_us - first_latency_us) / (last_ops - first_ops) / 1000
+throughput_ops_per_s = (last_ops - first_ops) / elapsed_seconds</div>
+              <p class="small">MongoDB stores cumulative op latency in microseconds. The script calculates the per-window average from the delta and converts the result to milliseconds for display.</p>
+            </div>
+            <div class="card">
+              <h3>CPU</h3>
+              <div class="code-block">cpu_pct = (delta_counter_ms / delta_time_ms) * 100
+cpu_normalized_pct = cpu_pct / cores</div>
+              <p class="small">Aggregate CPU percentages can exceed 100% on multi-core systems. The normalized values divide by detected core count to show per-core utilization.</p>
+            </div>
+            <div class="card">
+              <h3>Cache fill ratio</h3>
+              <div class="code-block">cache_fill_ratio_pct = (bytes_currently_in_cache / maximum_bytes_configured) * 100</div>
+              <p class="small">This gives a direct occupancy view of the configured WiredTiger cache.</p>
+            </div>
+            <div class="card">
+              <h3>Page faults and context switches</h3>
+              <div class="code-block">window_delta = last_cumulative_value - first_cumulative_value
+avg_per_second = window_delta / elapsed_seconds</div>
+              <p class="small">The script treats these as cumulative counters and reports both the total change over the window and the per-second average when useful.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="usage">
+          <div class="section-head">
+            <div class="eyebrow">Usage</div>
+            <h2>Run it exactly like a normal CLI tool.</h2>
+            <p>The script requires an explicit input argument and decides between raw FTDC and decoded JSON based on the path or the optional switch.</p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Examples</h3>
+              <div class="code-block">python3 ftdc_metrics_report.py /path/to/metrics.2026-05-11T04-19-11Z-00000
+python3 ftdc_metrics_report.py /path/to/diagnostic.data
+python3 ftdc_metrics_report.py /path/to/decoded.json
+python3 ftdc_metrics_report.py /path/to/snapshots.txt --decoded-json</div>
+            </div>
+            <div class="card">
+              <h3>Expected output shape</h3>
+              <ul>
+                <li>plain text report</li>
+                <li>Markdown-like tables for easy copy/paste into tickets or notes</li>
+                <li>no file artifacts written by the script itself</li>
+                <li>stdout-friendly for shell redirection if needed</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="limits">
+          <div class="section-head">
+            <div class="eyebrow">Limits and caveats</div>
+            <h2>Interpret the output with the right assumptions.</h2>
+            <p>The script is intentionally practical, but a few limits matter when reading the report.</p>
+          </div>
+          <div class="grid-2">
+            <div class="card warning">
+              <h3>CPU is conditional</h3>
+              <p>CPU metrics appear only when the FTDC input includes <span class="mono">systemMetrics.cpu</span>. A serverStatus-only JSON export can still produce memory and cache sections while leaving CPU unavailable.</p>
+            </div>
+            <div class="card warning">
+              <h3>Type 1 only on the raw path</h3>
+              <p>The raw FTDC summarizer focuses on type 1 metric chunks and ignores non-type-1 documents for the reporting path.</p>
+            </div>
+            <div class="card warning">
+              <h3>Latency is an average, not a percentile</h3>
+              <p>The latency section reports average per-op latency derived from cumulative counters. It does not estimate p95 or p99 latency.</p>
+            </div>
+            <div class="card warning">
+              <h3>Field coverage is targeted</h3>
+              <p>The decoder reconstructs only a fixed target-path set. It is optimized for this report, not as a general FTDC explorer.</p>
+            </div>
+          </div>
+          <div class="callout">Best use case: quick support triage and performance window analysis from raw FTDC, without first building a separate decode pipeline.</div>
+          <div class="footer-note">This infographic documents the current behavior of <span class="mono">ftdc_metrics_report.py</span>, including raw FTDC decoding, JSON fallback, latency rendering in milliseconds, CPU normalization, and WiredTiger cache reporting.</div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const buttons = Array.from(document.querySelectorAll('.mode-switch button'));
+    const panels = Array.from(document.querySelectorAll('.panel'));
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        const panel = document.getElementById(btn.dataset.target);
+        if (panel) panel.classList.add('active');
+      });
+    });
+
+    const tocLinks = Array.from(document.querySelectorAll('.toc a'));
+    const sections = tocLinks
+      .map(link => document.querySelector(link.getAttribute('href')))
+      .filter(Boolean);
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const id = '#' + entry.target.id;
+        tocLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === id));
+      });
+    }, { rootMargin: '-30% 0px -55% 0px', threshold: 0.01 });
+
+    sections.forEach(section => observer.observe(section));
+  </script>
+
+  <script>
+    window.GleanBridge.postMessage({
+      actionId: 'export-pdf',
+      type: 'glean-add-menu',
+      metadata: { label: 'Export as PDF', icon: 'export' }
+    });
+    window.GleanBridge.onMessage('action', function(data) {
+      if (data.actionId === 'export-pdf') window.print();
+    });
+
+    function prepareChartsForPrint() {
+      document.querySelectorAll('[_echarts_instance_]').forEach(function(el) {
+        var chart = echarts.getInstanceByDom(el);
+        if (!chart) return;
+        var img = new Image();
+        img.src = chart.getDataURL({ type: 'png', pixelRatio: 2 });
+        img.className = 'print-chart-img';
+        img.style.cssText =
+          'width:100%;height:100%;object-fit:contain;' +
+          'position:absolute;top:0;left:0;z-index:10;';
+        el.dataset.prevPosition = el.style.position;
+        el.style.position = 'relative';
+        el.appendChild(img);
+      });
+    }
+
+    function cleanUpAfterPrint() {
+      document.querySelectorAll('[_echarts_instance_]').forEach(function(el) {
+        var img = el.querySelector('.print-chart-img');
+        if (!img) return;
+        img.remove();
+        el.style.position = el.dataset.prevPosition || '';
+        delete el.dataset.prevPosition;
+      });
+    }
+
+    window.addEventListener('beforeprint', prepareChartsForPrint);
+    window.addEventListener('afterprint', cleanUpAfterPrint);
+  </script>
+</body>
+</html>
