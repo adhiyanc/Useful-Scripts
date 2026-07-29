@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shard Metrics Script Infographic</title>
+  <style>
+    :root {
+      --artifact-background: var(--theme-background, #ffffff);
+      --artifact-background-light: var(--theme-background-light, #f6f6f6);
+      --artifact-background-mid: var(--theme-background-mid, #f0f0f0);
+      --artifact-border-light: var(--theme-border-light, #e5e5e5);
+      --artifact-border-dark: var(--theme-border-dark, #cccccc);
+      --artifact-primary-brand: var(--theme-primary-brand, #343ced);
+      --artifact-primary-highlight: var(--theme-primary-highlight, #1b1b1b);
+      --artifact-primary-hover: var(--theme-primary-hover, #404040);
+      --artifact-selected: var(--theme-selected, #e8e8e8);
+      --artifact-text-primary: var(--theme-text-primary, #1b1b1b);
+      --artifact-text-secondary: var(--theme-text-secondary, #727272);
+      --artifact-text-highlight: var(--theme-text-highlight, #fff8e5);
+
+      --artifact-accent-indigo: #343ced;
+      --artifact-accent-olive: #82951e;
+      --artifact-accent-tangerine: #ef601b;
+      --artifact-accent-magenta: #dd2ca5;
+      --artifact-accent-amber: #cda515;
+
+      --artifact-accent-indigo-soft: #ececff;
+      --artifact-accent-olive-soft: #eef4d8;
+      --artifact-accent-tangerine-soft: #ffe6d8;
+      --artifact-accent-magenta-soft: #ffe0f5;
+      --artifact-accent-amber-soft: #fff3cf;
+
+      --artifact-accent-indigo-text: #1b1b1b;
+      --artifact-accent-olive-text: #1b1b1b;
+      --artifact-accent-tangerine-text: #1b1b1b;
+      --artifact-accent-magenta-text: #1b1b1b;
+      --artifact-accent-amber-text: #1b1b1b;
+
+      --artifact-shadow-soft: 0 18px 40px rgba(17, 24, 39, 0.08);
+      --artifact-shadow-hover: 0 24px 50px rgba(17, 24, 39, 0.12);
+      --artifact-shadow-line: 0 1px 0 rgba(17, 24, 39, 0.03);
+      --artifact-gradient-hero: linear-gradient(135deg, var(--artifact-background-light), var(--artifact-accent-indigo-soft));
+      --artifact-gradient-flow: linear-gradient(180deg, var(--artifact-background), var(--artifact-background-light));
+      --artifact-gradient-card: linear-gradient(180deg, var(--artifact-background), var(--artifact-background-light));
+      --artifact-code-bg: #f6f3eb;
+      --artifact-code-text: #1b1b1b;
+      --artifact-ring: rgba(52, 60, 237, 0.18);
+    }
+
+    html[data-theme='dark'] {
+      --artifact-accent-indigo-soft: #1f245e;
+      --artifact-accent-olive-soft: #28351b;
+      --artifact-accent-tangerine-soft: #4a2518;
+      --artifact-accent-magenta-soft: #4d1f43;
+      --artifact-accent-amber-soft: #473a14;
+
+      --artifact-accent-indigo-text: #eef0ff;
+      --artifact-accent-olive-text: #eff7dd;
+      --artifact-accent-tangerine-text: #fff0e9;
+      --artifact-accent-magenta-text: #ffeaf8;
+      --artifact-accent-amber-text: #fff6df;
+
+      --artifact-shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.26);
+      --artifact-shadow-hover: 0 24px 50px rgba(0, 0, 0, 0.34);
+      --artifact-shadow-line: 0 1px 0 rgba(255, 255, 255, 0.04);
+      --artifact-gradient-hero: linear-gradient(135deg, var(--artifact-background-light), var(--artifact-background-mid));
+      --artifact-gradient-flow: linear-gradient(180deg, var(--artifact-background), var(--artifact-background-mid));
+      --artifact-gradient-card: linear-gradient(180deg, var(--artifact-background-light), var(--artifact-background-mid));
+      --artifact-code-bg: #202020;
+      --artifact-code-text: #f5f5f5;
+      --artifact-ring: rgba(169, 224, 255, 0.2);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      line-height: 1.5;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 24px;
+      padding: 32px;
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 28px;
+      background: var(--artifact-gradient-hero);
+      box-shadow: var(--artifact-shadow-soft);
+      animation: rise 0.55s ease-out;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -120px -120px auto;
+      width: 320px;
+      height: 320px;
+      border-radius: 999px;
+      background: radial-gradient(circle, var(--artifact-accent-indigo-soft), transparent 65%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      color: var(--artifact-text-secondary);
+      font-size: 13px;
+      box-shadow: var(--artifact-shadow-line);
+    }
+
+    .hero h1 {
+      margin: 14px 0 12px;
+      font-size: clamp(2rem, 4vw, 3.35rem);
+      line-height: 1.03;
+      letter-spacing: -0.04em;
+      font-weight: 700;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 64ch;
+      color: var(--artifact-text-secondary);
+      font-size: 1.05rem;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .stat-card {
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      box-shadow: var(--artifact-shadow-soft);
+      transform: translateY(0);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .stat-card:hover,
+    .stat-card:focus-within {
+      transform: translateY(-4px);
+      box-shadow: var(--artifact-shadow-hover);
+      border-color: var(--artifact-border-dark);
+    }
+
+    .stat-card .label {
+      font-size: 0.82rem;
+      color: var(--artifact-text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: var(--artifact-text-primary);
+    }
+
+    .panel-stack {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .callout,
+    .mini-card,
+    .step,
+    .output-card,
+    .accordion,
+    .command-card,
+    .footer-card {
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-gradient-card);
+      color: var(--artifact-text-primary);
+      border-radius: 22px;
+      box-shadow: var(--artifact-shadow-soft);
+    }
+
+    .callout {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .callout .title {
+      font-size: 0.9rem;
+      color: var(--artifact-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .mini-card {
+      padding: 16px;
+      transition: transform 0.22s ease, background 0.22s ease;
+    }
+
+    .mini-card:hover {
+      transform: translateY(-3px);
+      background: var(--artifact-selected);
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .mini-card span {
+      color: var(--artifact-text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .section {
+      margin-top: 24px;
+      padding: 0;
+      animation: rise 0.55s ease-out both;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 0 4px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: -0.03em;
+    }
+
+    .section-header p {
+      margin: 4px 0 0;
+      color: var(--artifact-text-secondary);
+      max-width: 60ch;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .step {
+      position: relative;
+      padding: 18px;
+      min-height: 180px;
+      background: var(--artifact-gradient-flow);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .step:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--artifact-shadow-hover);
+    }
+
+    .step::after {
+      content: "→";
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--artifact-background);
+      border: 1px solid var(--artifact-border-light);
+      color: var(--artifact-text-secondary);
+      z-index: 2;
+    }
+
+    .step:last-child::after {
+      display: none;
+    }
+
+    .step-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      font-weight: 700;
+      color: var(--artifact-accent-indigo-text);
+      background: var(--artifact-accent-indigo-soft);
+    }
+
+    .step h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--artifact-text-secondary);
+      font-size: 0.92rem;
+    }
+
+    .expand-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    details.accordion {
+      overflow: hidden;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    details.accordion[open] {
+      box-shadow: var(--artifact-shadow-hover);
+    }
+
+    details.accordion:hover {
+      transform: translateY(-3px);
+    }
+
+    details.accordion summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      font-weight: 600;
+    }
+
+    details.accordion summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .summary-left {
+      display: grid;
+      gap: 4px;
+    }
+
+    .summary-left small {
+      color: var(--artifact-text-secondary);
+      font-weight: 400;
+      font-size: 0.84rem;
+    }
+
+    .summary-icon {
+      flex: 0 0 auto;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-background);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--artifact-text-secondary);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    details[open] .summary-icon {
+      transform: rotate(45deg);
+      background: var(--artifact-selected);
+    }
+
+    .accordion-body {
+      padding: 0 20px 20px;
+      color: var(--artifact-text-secondary);
+    }
+
+    .accordion-body p,
+    .accordion-body ul {
+      margin: 0 0 12px;
+    }
+
+    .accordion-body ul {
+      padding-left: 18px;
+    }
+
+    .code-chip,
+    code,
+    pre {
+      font-family: "SFMono-Regular", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    .code-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 12px;
+      background: var(--artifact-code-bg);
+      color: var(--artifact-code-text);
+      border: 1px solid var(--artifact-border-light);
+      font-size: 0.84rem;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .command-card {
+      padding: 20px;
+    }
+
+    .command-card pre {
+      margin: 0;
+      padding: 16px;
+      overflow: auto;
+      border-radius: 16px;
+      border: 1px solid var(--artifact-border-light);
+      background: var(--artifact-code-bg);
+      color: var(--artifact-code-text);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .command-card .note {
+      margin-top: 12px;
+      color: var(--artifact-text-secondary);
+      font-size: 0.92rem;
+    }
+
+    .outputs {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 16px;
+    }
+
+    .output-card {
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .output-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 6px;
+      background: var(--output-accent, var(--artifact-accent-indigo));
+    }
+
+    .output-card h3 {
+      margin: 10px 0 8px;
+      font-size: 1rem;
+    }
+
+    .output-card p {
+      margin: 0 0 14px;
+      color: var(--artifact-text-secondary);
+    }
+
+    .bar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: var(--artifact-background-mid);
+      overflow: hidden;
+      border: 1px solid var(--artifact-border-light);
+    }
+
+    .bar-fill {
+      width: 0;
+      height: 100%;
+      border-radius: 999px;
+      background: var(--output-soft, var(--artifact-accent-indigo-soft));
+      position: relative;
+      transition: width 1.05s cubic-bezier(.2,.75,.2,1);
+    }
+
+    .bar-fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, var(--output-accent, var(--artifact-accent-indigo)), transparent);
+      opacity: 0.28;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      color: var(--artifact-text-secondary);
+      font-size: 0.82rem;
+    }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .check-card {
+      padding: 18px;
+      border: 1px solid var(--artifact-border-light);
+      border-radius: 22px;
+      background: var(--artifact-gradient-card);
+      box-shadow: var(--artifact-shadow-soft);
+    }
+
+    .check-card ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--artifact-text-secondary);
+    }
+
+    .check-card h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .check-card p {
+      margin: 6px 0 0;
+      color: var(--artifact-text-secondary);
+      font-size: 0.92rem;
+    }
+
+    .footer-card {
+      margin-top: 24px;
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .footer-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.92rem;
+    }
+
+    .footer-card span {
+      color: var(--artifact-text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeSlide 0.55s ease forwards;
+    }
+
+    .delay-1 { animation-delay: 0.08s; }
+    .delay-2 { animation-delay: 0.16s; }
+    .delay-3 { animation-delay: 0.24s; }
+    .delay-4 { animation-delay: 0.32s; }
+
+    :focus-visible {
+      outline: 3px solid var(--artifact-ring);
+      outline-offset: 3px;
+      border-radius: 14px;
+    }
+
+    @keyframes fadeSlide {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media screen and (max-width: 1024px) {
+      .hero,
+      .outputs,
+      .flow,
+      .expand-grid,
+      .checklist,
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-grid,
+      .stat-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .step::after {
+        content: "↓";
+        right: auto;
+        left: 50%;
+        top: auto;
+        bottom: -12px;
+        transform: translateX(-50%);
+      }
+    }
+
+    @media screen and (max-width: 720px) {
+      .shell {
+        padding: 16px;
+      }
+
+      .hero {
+        padding: 22px;
+      }
+
+      .mini-grid,
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-header {
+        display: grid;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .fade-in {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @media print {
+      body {
+        margin: 0;
+        padding: 0.4in 0.6in;
+        background: #fff;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .container, .dashboard, .shell, main {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+
+      [style*="position:sticky"], [style*="position: sticky"],
+      [class*="topbar"], [class*="navbar"], [class*="header"][class*="sticky"] {
+        position: static !important;
+      }
+
+      section, [class*="section"], .header {
+        break-inside: avoid;
+        margin-bottom: 20px !important;
+      }
+
+      [class*="card"], [class*="Card"] {
+        break-inside: avoid;
+        padding: 18px !important;
+        box-shadow: none !important;
+        border: 1px solid rgba(0,0,0,0.08);
+      }
+
+      [class*="grid"], [class*="row"] {
+        gap: 10px !important;
+        margin-bottom: 20px !important;
+      }
+
+      [class*="chart"], [class*="Chart"] {
+        break-inside: avoid;
+        height: 240px !important;
+      }
+
+      [class*="chart"][class*="tall"], [class*="Chart"][class*="tall"],
+      [class*="chart"][class*="full"], [class*="Chart"][class*="full"] {
+        height: 280px !important;
+      }
+
+      table, thead, .funnel, .heatmap, .list, .goals {
+        break-inside: avoid;
+      }
+
+      [class*="quote-list"], [class*="scroll"],
+      [style*="max-height"], [style*="overflow"] {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+
+      [class*="tab-panel"], [class*="tabpanel"] {
+        display: block !important;
+      }
+
+      [class*="tab-bar"], [class*="tabs"]:not([class*="panel"]) {
+        display: none !important;
+      }
+
+      [class*="fade"], [class*="animate"], [class*="slide"] {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      button, [role="button"], .interactive-only {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow fade-in">Iinfographic • shard metrics script</div>
+        <h1 class="fade-in delay-1">Run one helper across many shards, then turn the results into JSON and CSV.</h1>
+        <p class="fade-in delay-2">This page explains the script visually: what you must provide, what happens on each host, where the outputs land, and how to troubleshoot the most common failures.</p>
+
+        <div class="stat-grid">
+          <div class="stat-card fade-in delay-1">
+            <div class="label">Required CLI arguments</div>
+            <div class="value count-up" data-target="3">0</div>
+          </div>
+          <div class="stat-card fade-in delay-2">
+            <div class="label">Primary output formats</div>
+            <div class="value count-up" data-target="2">0</div>
+          </div>
+          <div class="stat-card fade-in delay-3">
+            <div class="label">Execution mode today</div>
+            <div class="value">SSH</div>
+          </div>
+          <div class="stat-card fade-in delay-4">
+            <div class="label">Built-in worker model</div>
+            <div class="value">Parallel</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-stack">
+        <div class="callout fade-in delay-2">
+          <div class="title">At a glance</div>
+          <div class="pill-row">
+            <span class="pill">Reads PRIMARY_TARGETS</span>
+            <span class="pill">Loads decode_helper_py36.py</span>
+            <span class="pill">Runs python3 remotely</span>
+            <span class="pill">Collects per-shard JSON</span>
+            <span class="pill">Flattens metrics into CSV</span>
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <div class="mini-card fade-in delay-2">
+            <strong>Path pattern</strong>
+            <span>&lt;dir-prefix&gt;/&lt;shard&gt;/data/diagnostic.data</span>
+          </div>
+          <div class="mini-card fade-in delay-3">
+            <strong>Target format</strong>
+            <span>Python literal list of (shard, host) tuples</span>
+          </div>
+          <div class="mini-card fade-in delay-3">
+            <strong>Remote requirement</strong>
+            <span>SSH access and python3 available on every host</span>
+          </div>
+          <div class="mini-card fade-in delay-4">
+            <strong>Failure capture</strong>
+            <span>returncode, stdout, stderr, and a saved per-shard result</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Execution flow</h2>
+          <p>The script does the same sequence for every target shard, using one worker per target.</p>
+        </div>
+      </div>
+
+      <div class="flow">
+        <article class="step fade-in delay-1">
+          <div class="step-number">1</div>
+          <h3>Validate inputs</h3>
+          <p>Checks time formats, ensures the directory prefix is absolute, and rejects an end time earlier than the start time.</p>
+        </article>
+        <article class="step fade-in delay-2">
+          <div class="step-number">2</div>
+          <h3>Read helper script</h3>
+          <p>Loads <span class="code-chip">decode_helper_py36.py</span> into memory so the exact script body can be streamed to each host.</p>
+        </article>
+        <article class="step fade-in delay-3">
+          <div class="step-number">3</div>
+          <h3>Build metrics path</h3>
+          <p>Constructs the remote directory as <span class="code-chip">&lt;prefix&gt;/&lt;shard&gt;/data/diagnostic.data</span>.</p>
+        </article>
+        <article class="step fade-in delay-4">
+          <div class="step-number">4</div>
+          <h3>Run remote decode</h3>
+          <p>Uses SSH to run <span class="code-chip">python3 -</span> with shard, dir, start, and end arguments on the remote host.</p>
+        </article>
+        <article class="step fade-in delay-4">
+          <div class="step-number">5</div>
+          <h3>Aggregate outputs</h3>
+          <p>Saves per-shard JSON, then writes a combined JSON file and a flattened CSV built from each shard&apos;s metrics.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>What you need to provide</h2>
+          <p>These are the minimum inputs required for a clean run.</p>
+        </div>
+      </div>
+
+      <div class="expand-grid">
+        <details class="accordion fade-in delay-1" open>
+          <summary>
+            <span class="summary-left">
+              PRIMARY_TARGETS
+              <small>Environment variable with shard and host pairs</small>
+            </span>
+            <span class="summary-icon">+</span>
+          </summary>
+          <div class="accordion-body">
+            <p>The script reads target hosts from <span class="code-chip">PRIMARY_TARGETS</span> using <span class="code-chip">ast.literal_eval()</span>.</p>
+            <p>It expects a Python-style list of tuples:</p>
+            <div class="chips">
+              <span class="code-chip">[('shard01','host1.example.com'),('shard02','host2.example.com')]</span>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion fade-in delay-2">
+          <summary>
+            <span class="summary-left">
+              --start and --end
+              <small>Inclusive time window for the decode helper</small>
+            </span>
+            <span class="summary-icon">+</span>
+          </summary>
+          <div class="accordion-body">
+            <p>Accepted input styles:</p>
+            <ul>
+              <li>Epoch milliseconds</li>
+              <li>UTC ISO-8601 ending in Z</li>
+              <li>YYYY-MM-DD HH:MM:SS</li>
+              <li>YYYY-MM-DD HH:MM</li>
+              <li>YYYY-MM-DD</li>
+            </ul>
+            <div class="chips">
+              <span class="code-chip">2026-07-07T10:00:00Z</span>
+              <span class="code-chip">&quot;2026-07-07 10:00&quot;</span>
+              <span class="code-chip">1751872800000</span>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion fade-in delay-3">
+          <summary>
+            <span class="summary-left">
+              --dir-prefix
+              <small>Absolute base path for every shard directory</small>
+            </span>
+            <span class="summary-icon">+</span>
+          </summary>
+          <div class="accordion-body">
+            <p>This must start with a slash and cannot be empty.</p>
+            <p>Example:</p>
+            <div class="chips">
+              <span class="code-chip">/d/d3/sem2/qa</span>
+            </div>
+            <p>The script appends <span class="code-chip">&lt;shard&gt;/data/diagnostic.data</span> automatically.</p>
+          </div>
+        </details>
+
+        <details class="accordion fade-in delay-4">
+          <summary>
+            <span class="summary-left">
+              Remote host prerequisites
+              <small>What must already work on each target machine</small>
+            </span>
+            <span class="summary-icon">+</span>
+          </summary>
+          <div class="accordion-body">
+            <ul>
+              <li>SSH connectivity from the machine running this script</li>
+              <li><span class="code-chip">python3</span> installed remotely</li>
+              <li>Access to the computed diagnostic data path</li>
+              <li>A helper that writes valid JSON to stdout</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Run it</h2>
+          <p>Use this as the operator path: set targets first, then execute with a time range and directory prefix.</p>
+        </div>
+      </div>
+
+      <div class="command-card fade-in delay-2">
+        <pre>export PRIMARY_TARGETS="[('shard01','host1.example.com'),('shard02','host2.example.com')]"
+
+python3 collect_metrics.py \
+  --start 2026-07-07T10:00:00Z \
+  --end 2026-07-07T11:00:00Z \
+  --dir-prefix /d/d3/sem2/qa</pre>
+        <div class="note">The helper is sent over standard input to the remote host and executed as <span class="code-chip">python3 -</span>.</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>What the script writes</h2>
+          <p>Outputs are split into raw per-shard captures and combined rollups.</p>
+        </div>
+      </div>
+
+      <div class="outputs">
+        <article class="output-card fade-in delay-1" style="--output-accent: var(--artifact-accent-indigo); --output-soft: var(--artifact-accent-indigo-soft);">
+          <div class="eyebrow">Raw detail</div>
+          <h3>Per-shard JSON files</h3>
+          <p>Each shard gets its own result file with shard name, host, metrics directory, return code, decoded data, and any captured stdout or stderr.</p>
+          <div class="bar-track"><div class="bar-fill" data-width="92%"></div></div>
+          <div class="legend"><span>One file per shard</span><span>shard_outputs/&lt;shard&gt;.json</span></div>
+        </article>
+
+        <article class="output-card fade-in delay-2" style="--output-accent: var(--artifact-accent-olive); --output-soft: var(--artifact-accent-olive-soft);">
+          <div class="eyebrow">Combined record</div>
+          <h3>all_shards.json</h3>
+          <p>Contains the full aggregated result list after all futures complete and results are sorted by shard.</p>
+          <div class="bar-track"><div class="bar-fill" data-width="84%"></div></div>
+          <div class="legend"><span>Complete result set</span><span>shard_outputs/all_shards.json</span></div>
+        </article>
+
+        <article class="output-card fade-in delay-3" style="--output-accent: var(--artifact-accent-tangerine); --output-soft: var(--artifact-accent-tangerine-soft);">
+          <div class="eyebrow">Flattened summary</div>
+          <h3>all_shards.csv</h3>
+          <p>Built from the returned metrics map with columns for shard, metric, time window, first/last values, seconds, and delta.</p>
+          <div class="bar-track"><div class="bar-fill" data-width="76%"></div></div>
+          <div class="legend"><span>CSV columns</span><span>8 fields</span></div>
+        </article>
+
+        <article class="output-card fade-in delay-4" style="--output-accent: var(--artifact-accent-magenta); --output-soft: var(--artifact-accent-magenta-soft);">
+          <div class="eyebrow">Console summary</div>
+          <h3>Printed final JSON</h3>
+          <p>The script ends by printing a summary object including output paths, rows written, and the full result list.</p>
+          <div class="bar-track"><div class="bar-fill" data-width="68%"></div></div>
+          <div class="legend"><span>Operator feedback</span><span>stdout</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Troubleshooting map</h2>
+          <p>Hover and expand these cards when something fails. Each one ties the symptom to the likely fix.</p>
+        </div>
+      </div>
+
+      <div class="expand-grid">
+        <details class="accordion fade-in delay-1">
+          <summary>
+            <span class="summary-left">
+              --dir-prefix must be an absolute path
+              <small>Validation failure before any remote work starts</small>
+            </span>
+            <span class="summary-icon">+</span>
+          </summary>
+          <div class="accordion-body">
+            <p>You passed a relative path. Use a full absolute base directory such as:</p>
+            <div class="chips"><span class="code-chip">/d/d3/sem2/qa</span></div>
+          </div>
+        </details>
+
+        <details class="accordion fade-in delay-2">
+          <summary>
+            <span class="summary-left">
+              remote stdout was not valid JSON
+              <small>The helper printed non-JSON content to stdout</small>
+            </span>
+            <span class="summary-icon">+</span>
+          </summary>
+          <div class="accordion-body">
+            <p>Inspect the saved shard file under <span class="code-chip">shard_outputs/&lt;shard&gt;.json</span>. The helper should emit clean JSON only on stdout.</p>
+          </div>
+        </details>
+
+        <details class="accordion fade-in delay-3">
+          <summary>
+            <span class="summary-left">
+              ssh/remote command failed
+              <small>Transport or remote execution failure</small>
+            </span>
+            <span class="summary-icon">+</span>
+          </summary>
+          <div class="accordion-body">
+            <ul>
+              <li>Test SSH manually</li>
+              <li>Confirm <span class="code-chip">python3</span> exists on the host</li>
+              <li>Check the computed diagnostic data directory</li>
+              <li>Review captured stderr in the saved shard JSON</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="accordion fade-in delay-4">
+          <summary>
+            <span class="summary-left">
+              Empty CSV
+              <small>No usable metrics were returned</small>
+            </span>
+            <span class="summary-icon">+</span>
+          </summary>
+          <div class="accordion-body">
+            <p>This usually means either no shard returned valid <span class="code-chip">data</span> or the decoded <span class="code-chip">metrics</span> map was empty.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Pre-run checklist</h2>
+          <p>Use this checklist before you start a real collection run.</p>
+        </div>
+      </div>
+
+      <div class="checklist">
+        <article class="check-card fade-in delay-1">
+          <h3>Local side</h3>
+          <p>Everything on the machine where you launch the script.</p>
+          <ul>
+            <li><span class="code-chip">decode_helper_py36.py</span> is present</li>
+            <li><span class="code-chip">PRIMARY_TARGETS</span> is valid Python literal syntax</li>
+            <li>You know the correct start and end times</li>
+            <li>The base prefix path pattern is correct</li>
+          </ul>
+        </article>
+        <article class="check-card fade-in delay-2">
+          <h3>Remote side</h3>
+          <p>Everything that must work on each shard host.</p>
+          <ul>
+            <li>SSH is reachable</li>
+            <li><span class="code-chip">python3</span> is installed</li>
+            <li>The shard directory exists at the computed path</li>
+            <li>The helper can read the diagnostic data directory</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="footer-card fade-in delay-3">
+      <div class="section-header">
+        <div>
+          <h2>Keep in mind</h2>
+          <p>The code already contains a local execution path, but it is commented out. The active behavior is remote SSH execution only.</p>
+        </div>
+      </div>
+      <div class="footer-grid">
+        <div>
+          <strong>Current behavior</strong>
+          <span>Remote decode via ThreadPoolExecutor and SSH</span>
+        </div>
+        <div>
+          <strong>Optional future tweak</strong>
+          <span>Switch the submitted worker to run_local_decode for local-only testing</span>
+        </div>
+        <div>
+          <strong>Primary value</strong>
+          <span>Same helper, same time window, many shards, one consolidated output set</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function animateCount(el) {
+      var target = Number(el.dataset.target || '0');
+      var start = 0;
+      var duration = 900;
+      var startTime = null;
+      function frame(ts) {
+        if (!startTime) startTime = ts;
+        var progress = Math.min((ts - startTime) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        var value = Math.round(start + (target - start) * eased);
+        el.textContent = value;
+        if (progress < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function revealBars() {
+      document.querySelectorAll('.bar-fill').forEach(function(bar) {
+        var width = bar.getAttribute('data-width') || '0%';
+        requestAnimationFrame(function() {
+          bar.style.width = width;
+        });
+      });
+    }
+
+    document.querySelectorAll('.count-up').forEach(animateCount);
+    revealBars();
+
+    window.GleanBridge.postMessage({
+      actionId: 'export-pdf',
+      type: 'glean-add-menu',
+      metadata: { label: 'Export as PDF', icon: 'export' }
+    });
+    window.GleanBridge.onMessage('action', function(data) {
+      if (data.actionId === 'export-pdf') window.print();
+    });
+
+    function prepareChartsForPrint() {
+      document.querySelectorAll('[_echarts_instance_]').forEach(function(el) {
+        var chart = echarts.getInstanceByDom(el);
+        if (!chart) return;
+        var img = new Image();
+        img.src = chart.getDataURL({ type: 'png', pixelRatio: 2 });
+        img.className = 'print-chart-img';
+        img.style.cssText =
+          'width:100%;height:100%;object-fit:contain;' +
+          'position:absolute;top:0;left:0;z-index:10;';
+        el.dataset.prevPosition = el.style.position;
+        el.style.position = 'relative';
+        el.appendChild(img);
+      });
+    }
+
+    function cleanUpAfterPrint() {
+      document.querySelectorAll('[_echarts_instance_]').forEach(function(el) {
+        var img = el.querySelector('.print-chart-img');
+        if (!img) return;
+        img.remove();
+        el.style.position = el.dataset.prevPosition || '';
+        delete el.dataset.prevPosition;
+      });
+    }
+
+    window.addEventListener('beforeprint', prepareChartsForPrint);
+    window.addEventListener('afterprint', cleanUpAfterPrint);
+  </script>
+</body>
+</html>
