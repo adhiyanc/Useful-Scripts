@@ -1,4 +1,5 @@
 // performance_test.js - Fixed version with proper error handling  
+// Usage - mongosh --port 27018 --file /Users/adhiyan.chattopadhyay/Documents/Documents/performance_tests2.js
   
 const DB_NAME = "q_sl_approvals";  
 const COLLECTION = "validation_rules";  
