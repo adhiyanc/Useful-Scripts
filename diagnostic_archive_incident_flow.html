@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="glean-artifact-type" content="visual_content">
+  <title>Diagnostic Archive Incident Flow</title>
+  <style>
+    :root {
+      --artifact-background: #050505;
+      --artifact-background-light: #0d0b08;
+      --artifact-background-mid: #141009;
+      --artifact-border-light: #2a2118;
+      --artifact-border-dark: #3a2e20;
+      --artifact-primary-brand: #bd5347;
+      --artifact-primary-highlight: #d9c9ac;
+      --artifact-primary-hover: #a23e33;
+      --artifact-selected: #1c130d;
+      --artifact-text-primary: #b7a98e;
+      --artifact-text-secondary: #8a7e68;
+      --artifact-text-highlight: #f59e2b;
+      --artifact-positive-background: #14210f;
+      --artifact-positive-text: #d7e8c0;
+      --artifact-positive: #7fa34a;
+      --artifact-negative: #d4493b;
+      --artifact-warning-background: #24170b;
+      --artifact-warning: #f59e2b;
+      --artifact-info: #78a6c8;
+      --artifact-muted: #5e5548;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--artifact-background); }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--artifact-background);
+      color: var(--artifact-text-primary);
+      font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    button { font: inherit; }
+    .shell { max-width: 1180px; margin: 0 auto; padding: 40px 28px 56px; }
+    .eyebrow, .kicker, .panel-label, .metric-label {
+      color: var(--artifact-text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .eyebrow { color: var(--artifact-primary-brand); margin-bottom: 14px; }
+    h1, h2, h3 { margin: 0; color: var(--artifact-primary-highlight); font-weight: 500; letter-spacing: -.03em; }
+    h1 { max-width: 780px; font-size: clamp(2.6rem, 6vw, 5.6rem); line-height: .96; }
+    h2 { font-size: clamp(1.5rem, 3vw, 2.3rem); }
+    h3 { font-size: 1rem; line-height: 1.15; }
+    p { margin: 0; color: var(--artifact-text-secondary); }
+    .lede { max-width: 690px; margin-top: 20px; font-size: 1.05rem; }
+    .hero { display: flex; justify-content: space-between; gap: 32px; align-items: end; padding-bottom: 30px; border-bottom: 1px solid var(--artifact-border-light); }
+    .hero-mark { width: 96px; height: 96px; flex: 0 0 auto; border: 1px solid var(--artifact-primary-brand); border-radius: 50%; display: grid; place-items: center; color: var(--artifact-primary-brand); position: relative; }
+    .hero-mark::before, .hero-mark::after { content: ""; position: absolute; border: 1px solid var(--artifact-primary-brand); border-radius: 50%; opacity: .45; }
+    .hero-mark::before { inset: 12px; }
+    .hero-mark::after { inset: 28px; background: var(--artifact-primary-brand); opacity: .85; }
+    .hero-mark span { position: relative; z-index: 1; color: var(--artifact-background); font-size: 12px; font-weight: 700; }
+
+    .incident-strip { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; margin: 24px 0; padding: 18px 20px; background: var(--artifact-background-light); border: 1px solid var(--artifact-border-dark); }
+    .incident-title { display: flex; align-items: center; gap: 10px; color: var(--artifact-primary-highlight); font-weight: 600; }
+    .incident-title::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--artifact-warning); box-shadow: 0 0 0 5px var(--artifact-warning-background); }
+    .incident-copy { margin-top: 4px; font-size: .9rem; }
+    .incident-status { color: var(--artifact-warning); font-size: .78rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 26px 0 18px; }
+    .control { border: 1px solid var(--artifact-border-dark); background: var(--artifact-background-light); color: var(--artifact-text-primary); padding: 9px 14px; border-radius: 999px; cursor: pointer; transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease; }
+    .control:hover, .control:focus-visible { border-color: var(--artifact-primary-brand); color: var(--artifact-primary-highlight); outline: none; }
+    .control:active { transform: translateY(1px); }
+    .control.primary { background: var(--artifact-primary-brand); border-color: var(--artifact-primary-brand); color: var(--artifact-background); }
+    .control.primary:hover, .control.primary:focus-visible { background: var(--artifact-primary-hover); border-color: var(--artifact-primary-hover); color: var(--artifact-primary-highlight); }
+    .control[disabled] { cursor: default; opacity: .4; }
+    .step-readout { margin-left: auto; color: var(--artifact-text-secondary); font-size: .82rem; font-variant-numeric: tabular-nums; }
+
+    .progress-shell { height: 3px; background: var(--artifact-border-light); overflow: hidden; }
+    .progress-bar { height: 100%; width: 0%; background: var(--artifact-primary-brand); transition: width .55s ease; }
+
+    .main-grid { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 22px; margin-top: 24px; align-items: start; }
+    .stage-panel, .side-panel { background: var(--artifact-background-light); border: 1px solid var(--artifact-border-light); }
+    .stage-head { display: flex; justify-content: space-between; gap: 16px; padding: 22px 22px 18px; border-bottom: 1px solid var(--artifact-border-light); }
+    .stage-head p { margin-top: 6px; font-size: .88rem; }
+    .stage-tag { color: var(--artifact-primary-brand); font-size: .75rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+    .track-wrap { padding: 24px 22px 28px; overflow-x: auto; scrollbar-color: var(--artifact-border-dark) var(--artifact-background-light); }
+    .track { display: flex; align-items: stretch; width: max-content; min-width: 100%; }
+    .flow-step { width: 198px; flex: 0 0 198px; position: relative; }
+    .flow-step:not(:last-child) { margin-right: 38px; }
+    .flow-step:not(:last-child)::after { content: ""; position: absolute; width: 38px; height: 2px; right: -38px; top: 31px; background: var(--artifact-border-dark); }
+    .flow-step:not(:last-child)::before { content: ""; position: absolute; width: 7px; height: 7px; right: -4px; top: 28px; border-top: 2px solid var(--artifact-border-dark); border-right: 2px solid var(--artifact-border-dark); transform: rotate(45deg); z-index: 2; }
+    .flow-step.is-active:not(:last-child)::after { background: var(--artifact-primary-brand); animation: signal 1.1s linear infinite; }
+    .flow-step.is-active:not(:last-child)::before { border-color: var(--artifact-primary-brand); }
+    @keyframes signal { 0% { opacity: .25; } 50% { opacity: 1; } 100% { opacity: .25; } }
+    .step-index { width: 25px; height: 25px; display: grid; place-items: center; border: 1px solid var(--artifact-border-dark); border-radius: 50%; background: var(--artifact-background); color: var(--artifact-text-secondary); font-size: .72rem; font-weight: 700; margin-bottom: 12px; transition: all .35s ease; }
+    .step-card { min-height: 238px; padding: 16px 15px; border: 1px solid var(--artifact-border-light); background: var(--artifact-background-mid); transition: border-color .35s ease, background .35s ease, transform .35s ease, opacity .35s ease; }
+    .step-card:hover { border-color: var(--artifact-border-dark); }
+    .step-card.is-future { opacity: .42; }
+    .step-card.is-complete { opacity: .72; }
+    .flow-step.is-active .step-index { border-color: var(--artifact-primary-brand); background: var(--artifact-primary-brand); color: var(--artifact-background); box-shadow: 0 0 0 5px var(--artifact-selected); }
+    .flow-step.is-active .step-card { border-color: var(--artifact-primary-brand); background: var(--artifact-selected); transform: translateY(-4px); }
+    .flow-step.is-critical .step-card { border-color: var(--artifact-negative); }
+    .flow-step.is-critical .step-index { border-color: var(--artifact-negative); }
+    .kicker { color: var(--artifact-primary-brand); font-size: 10px; margin-bottom: 10px; }
+    .step-card h3 { color: var(--artifact-primary-highlight); margin-bottom: 8px; }
+    .step-card p { font-size: .82rem; line-height: 1.45; }
+    .step-value { margin-top: 17px; padding-top: 12px; border-top: 1px solid var(--artifact-border-light); color: var(--artifact-text-highlight); font-family: "SF Mono", "Consolas", monospace; font-size: .72rem; line-height: 1.4; word-break: break-word; }
+    .step-value.good { color: var(--artifact-positive); }
+    .step-value.bad { color: var(--artifact-negative); }
+    .step-value.info { color: var(--artifact-info); }
+
+    .side-panel { padding: 22px; }
+    .side-section + .side-section { margin-top: 28px; padding-top: 25px; border-top: 1px solid var(--artifact-border-light); }
+    .side-section h3 { margin-top: 6px; color: var(--artifact-primary-highlight); }
+    .memory-readout { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin: 18px 0 10px; }
+    .memory-value { color: var(--artifact-primary-highlight); font-size: 2.55rem; font-weight: 300; line-height: 1; font-variant-numeric: tabular-nums; }
+    .memory-unit { color: var(--artifact-text-secondary); font-size: .8rem; }
+    .memory-bar { height: 10px; background: var(--artifact-border-light); overflow: hidden; }
+    .memory-fill { height: 100%; width: 0%; background: var(--artifact-positive); transition: width .7s ease, background .4s ease; }
+    .memory-fill.warning { background: var(--artifact-warning); }
+    .memory-fill.critical { background: var(--artifact-negative); animation: pulse 1s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: .45; } }
+    .memory-note { display: flex; justify-content: space-between; margin-top: 8px; color: var(--artifact-text-secondary); font-size: .74rem; }
+    .threshold { color: var(--artifact-warning); }
+    .condition-box { margin-top: 16px; padding: 13px; background: var(--artifact-warning-background); border: 1px solid var(--artifact-border-dark); }
+    .condition-box strong { display: block; color: var(--artifact-warning); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
+    .condition-box span { display: block; margin-top: 5px; color: var(--artifact-text-primary); font-size: .82rem; }
+    .corruption-bubble { margin-top: 13px; padding: 11px 12px; border: 1px solid var(--artifact-negative); background: var(--artifact-background-light); opacity: 0; transform: translateY(8px) scale(.98); pointer-events: none; transition: opacity .35s ease, transform .35s ease; }
+    .flow-step.is-active .corruption-bubble { opacity: 1; transform: translateY(0) scale(1); }
+    .corruption-bubble .bubble-label { color: var(--artifact-negative); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .corruption-bubble strong { display: block; margin-top: 5px; color: var(--artifact-primary-highlight); font-size: .78rem; }
+    .corruption-bubble p { margin-top: 4px; color: var(--artifact-text-secondary); font-size: .72rem; line-height: 1.4; }
+    .corruption-bubble .bubble-foot { margin-top: 7px; color: var(--artifact-warning); font-family: "SF Mono", "Consolas", monospace; font-size: .64rem; line-height: 1.35; }
+    .driver-condition { display: none; margin-top: 16px; padding: 13px; border: 1px solid var(--artifact-negative); background: var(--artifact-background-mid); }
+    .driver-condition.is-visible { display: block; animation: reveal .35s ease both; }
+    .driver-condition strong { display: block; color: var(--artifact-negative); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
+    .driver-condition ol { margin: 9px 0 0 17px; padding: 0; color: var(--artifact-text-secondary); font-size: .73rem; line-height: 1.45; }
+    .driver-condition li + li { margin-top: 5px; }
+    .driver-condition a { color: var(--artifact-info); }
+    @keyframes reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .event-list { display: grid; gap: 10px; margin-top: 14px; }
+    .event-line { display: grid; grid-template-columns: 7px 1fr; gap: 10px; align-items: start; font-size: .78rem; color: var(--artifact-text-secondary); }
+    .event-dot { width: 7px; height: 7px; margin-top: 6px; border-radius: 50%; background: var(--artifact-muted); }
+    .event-line.current { color: var(--artifact-primary-highlight); }
+    .event-line.current .event-dot { background: var(--artifact-primary-brand); box-shadow: 0 0 0 4px var(--artifact-selected); }
+    .event-line.critical { color: var(--artifact-negative); }
+    .event-line.critical .event-dot { background: var(--artifact-negative); }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; color: var(--artifact-text-secondary); font-size: .73rem; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 8px; height: 8px; display: inline-block; border-radius: 50%; background: var(--artifact-primary-brand); }
+    .legend i.warn { background: var(--artifact-warning); }
+    .legend i.fail { background: var(--artifact-negative); }
+
+    .narrative { margin-top: 22px; padding: 22px; border: 1px solid var(--artifact-border-light); background: var(--artifact-background-light); }
+    .narrative-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: start; }
+    .narrative h2 { margin-top: 7px; }
+    .narrative-copy { margin-top: 12px; max-width: 650px; font-size: .92rem; }
+    .sequence { display: grid; gap: 8px; }
+    .sequence-row { display: grid; grid-template-columns: 26px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--artifact-border-light); font-size: .79rem; }
+    .sequence-row:last-child { border-bottom: 0; }
+    .sequence-number { color: var(--artifact-primary-brand); font-family: "SF Mono", "Consolas", monospace; }
+    .sequence-text { color: var(--artifact-text-secondary); }
+    .sequence-text strong { color: var(--artifact-primary-highlight); font-weight: 500; }
+
+    @media (max-width: 860px) {
+      .main-grid, .narrative-grid { grid-template-columns: 1fr; }
+      .hero-mark { display: none; }
+      .incident-strip { grid-template-columns: 1fr; }
+      .incident-status { white-space: normal; }
+      .step-readout { margin-left: 0; width: 100%; }
+    }
+    @media (max-width: 520px) {
+      .shell { padding: 28px 16px 40px; }
+      .hero { padding-bottom: 24px; }
+      .controls { gap: 6px; }
+      .control { padding: 8px 11px; font-size: .82rem; }
+      .stage-head, .track-wrap, .side-panel, .narrative { padding-left: 16px; padding-right: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+    }
+    @media print {
+      :root { --artifact-background: #ffffff; --artifact-background-light: #f4f2ee; --artifact-background-mid: #fbfaf7; --artifact-border-light: #d9d4ca; --artifact-border-dark: #b8b0a2; --artifact-primary-brand: #9a3328; --artifact-primary-highlight: #251f19; --artifact-selected: #eee7dc; --artifact-text-primary: #3b342c; --artifact-text-secondary: #655d52; --artifact-text-highlight: #9a5b00; --artifact-positive-background: #eaf2df; --artifact-positive-text: #385b1a; --artifact-positive: #4f7a24; --artifact-negative: #a62d22; --artifact-warning-background: #fff1dc; --artifact-warning: #9a5b00; --artifact-info: #245c85; --artifact-muted: #8a8175; }
+      body { background: var(--artifact-background); print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .shell { max-width: 100%; padding: 20px; }
+      .controls { display: none; }
+      .stage-panel, .side-panel, .narrative, .incident-strip { break-inside: avoid; }
+      .track-wrap { overflow: visible; }
+      .track { width: 100%; flex-wrap: wrap; gap: 12px; }
+      .flow-step { width: calc(33.333% - 12px); flex-basis: calc(33.333% - 12px); }
+      .flow-step:not(:last-child) { margin-right: 0; }
+      .flow-step::after, .flow-step::before { display: none; }
+      .step-card.is-future { opacity: 1; }
+      .main-grid { grid-template-columns: 1fr 270px; }
+      @page { size: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell" data-glean-id="incident-explainer">
+    <header class="hero" data-glean-id="incident-header">
+      <div>
+        <div class="eyebrow">Incident sequence / diagnostic archive</div>
+        <h1>Memory pressure turns a log fetch into a backup abort.</h1>
+        <p class="lede">An animated walkthrough of how a diagnostic archive request can move from heavy appDB log activity to driver corruption and a defensive snapshot abort.</p>
+      </div>
+      <div class="hero-mark" aria-hidden="true"><span>OOM</span></div>
+    </header>
+
+    <section class="incident-strip" data-glean-id="incident-summary">
+      <div>
+        <div class="incident-title">Condition under investigation</div>
+        <p class="incident-copy">appDB contains a high volume of log entries while a diagnostic archive is requested.</p>
+      </div>
+      <div class="incident-status" id="incidentStatus">Replay ready</div>
+    </section>
+
+    <section class="controls" aria-label="Animation controls" data-glean-id="animation-controls">
+      <button class="control primary" type="button" id="playButton">Play sequence</button>
+      <button class="control" type="button" id="pauseButton">Pause</button>
+      <button class="control" type="button" id="prevButton">Previous</button>
+      <button class="control" type="button" id="nextButton">Next</button>
+      <button class="control" type="button" id="resetButton">Reset</button>
+      <span class="step-readout" id="stepReadout">Beat 1 of 9</span>
+    </section>
+    <div class="progress-shell" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+
+    <section class="main-grid" data-glean-id="animation-stage">
+      <div class="stage-panel">
+        <div class="stage-head">
+          <div>
+            <div class="panel-label">Animated flow</div>
+            <h2 id="stageTitle">Diagnostic archive requested</h2>
+            <p id="stageSubtitle">The archive begins fetching a large volume of log entries from appDB.</p>
+          </div>
+          <div class="stage-tag" id="stageTag">01 / request</div>
+        </div>
+        <div class="track-wrap">
+          <div class="track" id="track">
+            <div class="flow-step is-active" data-step="0" data-glean-id="flow-request">
+              <div class="step-index">01</div>
+              <div class="step-card">
+                <div class="kicker">Request</div>
+                <h3>Diagnostic archive requested</h3>
+                <p>appDB already has a lot of log entries when the archive starts.</p>
+                <div class="step-value info">input: high log volume</div>
+              </div>
+            </div>
+            <div class="flow-step" data-step="1" data-glean-id="flow-fetch">
+              <div class="step-index">02</div>
+              <div class="step-card">
+                <div class="kicker">Fetch</div>
+                <h3>Logs are fetched</h3>
+                <p>The diagnostic archive pulls the growing log set into memory.</p>
+                <div class="step-value info">archive thread: active</div>
+              </div>
+            </div>
+            <div class="flow-step" data-step="2" data-glean-id="flow-memory-growth">
+              <div class="step-index">03</div>
+              <div class="step-card">
+                <div class="kicker">Pressure</div>
+                <h3>Memory usage grows</h3>
+                <p>Resident memory moves close to the configured limit.</p>
+                <div class="step-value">memory: approaching limit</div>
+              </div>
+            </div>
+            <div class="flow-step is-critical" data-step="3" data-glean-id="flow-monitoring-oom">
+              <div class="step-index">04</div>
+              <div class="step-card">
+                <div class="kicker">OOM</div>
+                <h3>Monitoring threads hit OOM</h3>
+                <p>Several monitoring and metrics threads fail while writing data to appDB.</p>
+                <div class="step-value bad">write(appDB): OOM</div>
+              </div>
+            </div>
+            <div class="flow-step is-critical" data-step="4" data-glean-id="flow-driver-corruption">
+              <div class="step-index">05</div>
+              <div class="step-card">
+                <div class="kicker">Cascade</div>
+                <h3>Driver corruption occurs</h3>
+                <p>One OOM event causes the appDB driver to enter a corrupted state.</p>
+                <div class="step-value bad">driver: corrupted</div>
+                <div class="corruption-bubble" data-glean-id="corruption-condition-bubble">
+                  <div class="bubble-label">Corruption condition</div>
+                  <strong>OOM during a write request</strong>
+                  <p>reply unread → connection returned → stale reply reused → responseTo mismatch</p>
+                  <div class="bubble-foot">only this OOM / write-request window corrupts the driver</div>
+                </div>
+              </div>
+            </div>
+            <div class="flow-step is-critical" data-step="5" data-glean-id="flow-empty-archive">
+              <div class="step-index">06</div>
+              <div class="step-card">
+                <div class="kicker">Archive OOM</div>
+                <h3>Archive finishes empty</h3>
+                <p>The diagnostic archive thread reaches OOM, then the request completes.</p>
+                <div class="step-value bad">appServerLogs.json = []</div>
+              </div>
+            </div>
+            <div class="flow-step" data-step="6" data-glean-id="flow-gc">
+              <div class="step-index">07</div>
+              <div class="step-card">
+                <div class="kicker">Recovery</div>
+                <h3>Memory is reclaimed</h3>
+                <p>Garbage collection releases memory after the archive request ends.</p>
+                <div class="step-value good">GC: memory reclaimed</div>
+              </div>
+            </div>
+            <div class="flow-step is-critical" data-step="7" data-glean-id="flow-backup-failure">
+              <div class="step-index">08</div>
+              <div class="step-card">
+                <div class="kicker">Backup</div>
+                <h3>Backup writes fail</h3>
+                <p>New backup requests try to write to appDB but hit the corrupted driver.</p>
+                <div class="step-value bad">write(appDB): driver error</div>
+              </div>
+            </div>
+            <div class="flow-step is-critical" data-step="8" data-glean-id="flow-abort">
+              <div class="step-index">09</div>
+              <div class="step-card">
+                <div class="kicker">Defensive action</div>
+                <h3>Snapshot is aborted</h3>
+                <p>The agent detects the error and defensively aborts the backup snapshot.</p>
+                <div class="step-value bad">snapshot: aborted</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side-panel" data-glean-id="telemetry-panel">
+        <section class="side-section" data-glean-id="memory-telemetry">
+          <div class="panel-label">Relative memory pressure <span class="tooltip" tabindex="0" aria-label="Illustrative pressure scale">ⓘ</span></div>
+          <div class="memory-readout"><span class="memory-value" id="memoryValue">76%</span><span class="memory-unit">of limit</span></div>
+          <div class="memory-bar" aria-label="Relative memory pressure"><div class="memory-fill" id="memoryFill"></div></div>
+          <div class="memory-note"><span>reclaimed after GC</span><span class="threshold">near limit</span></div>
+          <div class="condition-box"><strong id="conditionLabel">Condition active</strong><span id="conditionText">High log volume + archive fetch increases memory pressure.</span></div>
+          <div class="driver-condition" id="driverCondition" data-glean-id="driver-corruption-condition" aria-hidden="true">
+            <strong>Why the driver becomes corrupted</strong>
+            <ol>
+              <li>An <code>OutOfMemoryError</code> lands during a wire request's write path.</li>
+              <li>The server reply is not fully consumed, but the connection is returned to the pool.</li>
+              <li>The next operation reuses the connection and reads the stale reply.</li>
+              <li>The <code>responseTo</code> mismatch desynchronizes the stream.</li>
+            </ol>
+            <p style="margin-top:9px; font-size:.7rem;">Read safeguard: driver 4.9.1 clears dirty state for read requests; the write-request fix is tracked in <a href="https://jira.mongodb.org/browse/JAVA-6210" target="_blank" rel="noopener">JAVA-6210</a>.</p>
+          </div>
+        </section>
+
+        <section class="side-section" data-glean-id="event-log">
+          <div class="panel-label">Event log</div>
+          <div class="event-list" id="eventList"></div>
+          <div class="legend" aria-label="Legend">
+            <span><i></i> active</span>
+            <span><i class="warn"></i> pressure</span>
+            <span><i class="fail"></i> failure</span>
+          </div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="narrative" data-glean-id="incident-narrative">
+      <div class="narrative-grid">
+        <div>
+          <div class="panel-label">What the replay demonstrates</div>
+          <h2 id="narrativeTitle">The first visible failure is not the first causal event.</h2>
+          <p class="narrative-copy" id="narrativeCopy">The archive request creates memory pressure; the monitoring OOM and driver corruption form the bridge between that pressure and the later backup failure. The final abort is the agent's defensive response.</p>
+        </div>
+        <div class="sequence" data-glean-id="causal-sequence">
+          <div class="sequence-row"><span class="sequence-number">01</span><span class="sequence-text"><strong>Trigger</strong> high-volume log fetch</span></div>
+          <div class="sequence-row"><span class="sequence-number">02</span><span class="sequence-text"><strong>Resource pressure</strong> memory approaches limit</span></div>
+          <div class="sequence-row"><span class="sequence-number">03</span><span class="sequence-text"><strong>Damage</strong> OOM causes driver corruption</span></div>
+          <div class="sequence-row"><span class="sequence-number">04</span><span class="sequence-text"><strong>Protection</strong> agent aborts the snapshot</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const beats = [
+      { title: 'Diagnostic archive requested', subtitle: 'The archive begins fetching a large volume of log entries from appDB.', tag: '01 / request', memory: 76, label: 'Condition active', condition: 'High log volume + archive fetch increases memory pressure.', narrative: 'The incident begins before an explicit failure: appDB already contains a large volume of log entries when the archive request starts.' },
+      { title: 'Logs are fetched into memory', subtitle: 'The diagnostic archive pulls the growing log set into memory.', tag: '02 / fetch', memory: 84, label: 'Pressure rising', condition: 'The archive thread is actively consuming memory while fetching logs.', narrative: 'The archive thread becomes the visible consumer of memory as it gathers the log data needed for the diagnostic package.' },
+      { title: 'Memory usage approaches the limit', subtitle: 'Resident memory moves close to the configured limit.', tag: '03 / pressure', memory: 94, label: 'Near memory limit', condition: 'There is little remaining headroom for concurrent writes.', narrative: 'The system is now operating with very little headroom, so unrelated background writes can become the next failure point.' },
+      { title: 'Monitoring and metrics threads hit OOM', subtitle: 'Several threads fail while attempting to write data to appDB.', tag: '04 / OOM', memory: 99, label: 'OOM observed', condition: 'Concurrent monitoring writes fail under memory pressure.', narrative: 'The first major cascade point is the monitoring and metrics activity: several threads hit OOM while writing to appDB.' },
+      { title: 'One OOM causes driver corruption', subtitle: 'The appDB driver enters a corrupted state after one of the OOM events.', tag: '05 / cascade', memory: 99, label: 'Driver corrupted', condition: 'Only an OOM during the affected write-request window causes the stale-reply / responseTo mismatch.', narrative: 'The corruption condition is narrow: an OOM on a write request leaves the reply unread, returns the connection to the pool, and lets the next operation consume a stale reply.' },
+      { title: 'Diagnostic archive completes empty', subtitle: 'The archive thread reaches OOM and the request finishes with an empty log file.', tag: '06 / archive OOM', memory: 98, label: 'Archive incomplete', condition: 'appServerLogs.json contains only 2 bytes: []', narrative: 'The diagnostic request technically finishes, but its appServerLogs.json payload is empty because the archive thread reached OOM.' },
+      { title: 'Garbage collection reclaims memory', subtitle: 'Memory is released after the diagnostic archive request ends.', tag: '07 / recovery', memory: 31, label: 'Memory reclaimed', condition: 'GC reduces pressure, but it does not repair the corrupted driver.', narrative: 'Memory pressure falls after GC. That recovery can obscure the earlier damage: the driver remains corrupted even though memory looks healthy again.' },
+      { title: 'Backup requests fail to write', subtitle: 'New backup requests reach appDB and fail because the driver is corrupted.', tag: '08 / backup', memory: 43, label: 'Backup write failure', condition: 'Backup writes fail despite lower current memory pressure.', narrative: 'Later backup requests inherit the driver problem. Their writes fail even after the memory graph has returned to a safer level.' },
+      { title: 'Agent aborts the backup snapshot', subtitle: 'The agent detects the error and defensively aborts the snapshot.', tag: '09 / protection', memory: 43, label: 'Snapshot aborted', condition: 'Defensive abort prevents the backup from proceeding in an unsafe state.', narrative: 'The final action is protective: the agent aborts the backup snapshot rather than continuing after an appDB write error.' }
+    ];
+
+    let current = 0;
+    let timer = null;
+    const steps = [...document.querySelectorAll('.flow-step')];
+    const stageTitle = document.getElementById('stageTitle');
+    const stageSubtitle = document.getElementById('stageSubtitle');
+    const stageTag = document.getElementById('stageTag');
+    const incidentStatus = document.getElementById('incidentStatus');
+    const stepReadout = document.getElementById('stepReadout');
+    const progressBar = document.getElementById('progressBar');
+    const memoryValue = document.getElementById('memoryValue');
+    const memoryFill = document.getElementById('memoryFill');
+    const conditionLabel = document.getElementById('conditionLabel');
+    const conditionText = document.getElementById('conditionText');
+    const driverCondition = document.getElementById('driverCondition');
+    const eventList = document.getElementById('eventList');
+    const narrativeCopy = document.getElementById('narrativeCopy');
+    const playButton = document.getElementById('playButton');
+
+    function render(index) {
+      current = Math.max(0, Math.min(index, beats.length - 1));
+      const beat = beats[current];
+      steps.forEach((step, i) => {
+        step.classList.toggle('is-active', i === current);
+        step.classList.toggle('is-complete', i < current);
+        step.classList.toggle('is-future', i > current);
+        step.setAttribute('aria-current', i === current ? 'step' : 'false');
+      });
+      stageTitle.textContent = beat.title;
+      stageSubtitle.textContent = beat.subtitle;
+      stageTag.textContent = beat.tag;
+      stepReadout.textContent = `Beat ${current + 1} of ${beats.length}`;
+      progressBar.style.width = `${(current / (beats.length - 1)) * 100}%`;
+      memoryValue.textContent = `${beat.memory}%`;
+      memoryFill.style.width = `${beat.memory}%`;
+      memoryFill.className = 'memory-fill' + (beat.memory >= 98 ? ' critical' : beat.memory >= 85 ? ' warning' : '');
+      conditionLabel.textContent = beat.label;
+      conditionText.textContent = beat.condition;
+      driverCondition.classList.toggle('is-visible', current === 4);
+      driverCondition.setAttribute('aria-hidden', current === 4 ? 'false' : 'true');
+      narrativeCopy.textContent = beat.narrative;
+      incidentStatus.textContent = current === beats.length - 1 ? 'Sequence complete' : `Replay / ${beat.tag}`;
+      eventList.innerHTML = beats.slice(0, current + 1).map((item, i) => {
+        const isCritical = [3, 4, 5, 7, 8].includes(i);
+        const className = `${i === current ? 'current ' : ''}${isCritical ? 'critical' : ''}`;
+        return `<div class="event-line ${className}" data-glean-id="event-${i + 1}"><span class="event-dot"></span><span>${String(i + 1).padStart(2, '0')} · ${item.title}</span></div>`;
+      }).join('');
+      steps[current].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+
+    function play() {
+      clearInterval(timer);
+      timer = setInterval(() => {
+        if (current >= beats.length - 1) { pause(); return; }
+        render(current + 1);
+      }, 1850);
+      playButton.textContent = 'Playing…';
+      incidentStatus.textContent = 'Replay running';
+    }
+    function pause() {
+      clearInterval(timer);
+      timer = null;
+      playButton.textContent = 'Play sequence';
+    }
+    function reset() { pause(); render(0); }
+
+    document.getElementById('playButton').addEventListener('click', play);
+    document.getElementById('pauseButton').addEventListener('click', pause);
+    document.getElementById('prevButton').addEventListener('click', () => { pause(); render(current - 1); });
+    document.getElementById('nextButton').addEventListener('click', () => { pause(); render(current + 1); });
+    document.getElementById('resetButton').addEventListener('click', reset);
+    steps.forEach((step, i) => step.addEventListener('click', () => { pause(); render(i); }));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight') { pause(); render(current + 1); }
+      if (event.key === 'ArrowLeft') { pause(); render(current - 1); }
+      if (event.key === ' ') { event.preventDefault(); timer ? pause() : play(); }
+    });
+
+    window.GleanBridge?.postMessage({ actionId: 'export-pdf', type: 'glean-add-menu', metadata: { label: 'Export as PDF', icon: 'export' } });
+    window.GleanBridge?.onMessage('action', function(data) { if (data.actionId === 'export-pdf') window.print(); });
+    window.addEventListener('beforeprint', pause);
+    render(0);
+  </script>
+</body>
+</html>
