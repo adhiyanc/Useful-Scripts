@@ -59,19 +59,24 @@ CPU_PATH_ALIASES = {
         'serverStatus.systemMetrics.cpu.contextSwitches',
     ],
     'cores': [
-        'systemMetrics.cpu.num_cpus',
-        'serverStatus.systemMetrics.cpu.num_cpus',
-        'systemMetrics.cpu.logical_cores',
-        'serverStatus.systemMetrics.cpu.logical_cores',
-        'systemMetrics.cpu.num_cores',
-        'serverStatus.systemMetrics.cpu.num_cores',
-        'systemMetrics.cpu.cores',
-        'serverStatus.systemMetrics.cpu.cores',
-        'systemMetrics.cpu.cpu_count',
-        'serverStatus.systemMetrics.cpu.cpu_count',
-        'systemMetrics.cpu.cpuCount',
-        'serverStatus.systemMetrics.cpu.cpuCount',
-    ],
+    'systemMetrics.cpu.num_cores_available_to_process',
+    'serverStatus.systemMetrics.cpu.num_cores_available_to_process',
+    'systemMetrics.cpu.num_cpus',
+    'serverStatus.systemMetrics.cpu.num_cpus',
+    'systemMetrics.cpu.num_logical_cores',
+    'serverStatus.systemMetrics.cpu.num_logical_cores',
+    'systemMetrics.cpu.logical_cores',
+    'serverStatus.systemMetrics.cpu.logical_cores',
+    'systemMetrics.cpu.num_cores',
+    'serverStatus.systemMetrics.cpu.num_cores',
+    'systemMetrics.cpu.cores',
+    'serverStatus.systemMetrics.cpu.cores',
+    'systemMetrics.cpu.cpu_count',
+    'serverStatus.systemMetrics.cpu.cpu_count',
+    'systemMetrics.cpu.cpuCount',
+    'serverStatus.systemMetrics.cpu.cpuCount',
+],
+
 }
 SYSTEM_MEMORY_SCALED_ALIASES = {
     'total_mib': [
@@ -242,6 +247,26 @@ def first_present(mapping, keys):
         value = norm_map.get(_normalize_lookup_key(key))
         if value is not None:
             return value
+    return None
+
+def first_positive_present(mapping, keys):
+    norm_map = _normalized_mapping_lookup(mapping)
+
+    for key in keys:
+        value = mapping.get(key)
+        if value is None:
+            value = norm_map.get(_normalize_lookup_key(key))
+        if value is None:
+            continue
+
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            continue
+
+        if math.isfinite(value) and value > 0:
+            return value
+
     return None
 
 
@@ -490,27 +515,60 @@ def iter_chunk_target_rows(raw_chunk_data: bytes, wanted_paths: set[str], wanted
 
 
 # -----------------------------
-# Summary logic shared by raw / decoded paths
+# Summary logic shared by raw / decoded paths / changed 14th Ocotber to include latency summary with max value
 # -----------------------------
 
-def latency_summary_rows(first_row: dict, last_row: dict):
+def latency_summary_rows(rows: list[dict]):
     out = {}
+
     for cat in LATENCY_CATS:
-        f_lat = first_row.get(f'serverStatus.opLatencies.{cat}.latency')
-        f_ops = first_row.get(f'serverStatus.opLatencies.{cat}.ops')
-        l_lat = last_row.get(f'serverStatus.opLatencies.{cat}.latency')
-        l_ops = last_row.get(f'serverStatus.opLatencies.{cat}.ops')
-        if None in (f_lat, f_ops, l_lat, l_ops):
+        lat_key = f'serverStatus.opLatencies.{cat}.latency'
+        ops_key = f'serverStatus.opLatencies.{cat}.ops'
+
+        first_lat = rows[0].get(lat_key)
+        first_ops = rows[0].get(ops_key)
+        last_lat = rows[-1].get(lat_key)
+        last_ops = rows[-1].get(ops_key)
+
+        if None in (first_lat, first_ops, last_lat, last_ops):
             continue
-        d_lat = l_lat - f_lat
-        d_ops = l_ops - f_ops
+
+        delta_latency = last_lat - first_lat
+        delta_ops = last_ops - first_ops
+
+        interval_averages = []
+        prev_lat = prev_ops = None
+
+        for row in rows:
+            lat = row.get(lat_key)
+            ops = row.get(ops_key)
+
+            if lat is None or ops is None:
+                prev_lat = prev_ops = None
+                continue
+
+            if prev_lat is not None:
+                interval_latency = lat - prev_lat
+                interval_ops = ops - prev_ops
+
+                # Ignore counter resets and intervals with no operations.
+                if interval_latency >= 0 and interval_ops > 0:
+                    interval_averages.append(interval_latency / interval_ops)
+
+            prev_lat, prev_ops = lat, ops
+
         out[cat] = {
-            'delta_ops': d_ops,
-            'delta_latency_us': d_lat,
-            'window_avg_us': (d_lat / d_ops) if d_ops else None,
-            'lifetime_avg_us': (l_lat / l_ops) if l_ops else None,
+            'delta_ops': delta_ops,
+            'delta_latency_us': delta_latency,
+            'window_avg_us': (delta_latency / delta_ops) if delta_ops else None,
+            'max_interval_avg_us': (
+                max(interval_averages) if interval_averages else None
+            ),
+            'lifetime_avg_us': (last_lat / last_ops) if last_ops else None,
         }
+
     return out
+
 
 
 def collect_hardware_rows(rows: list[dict]):
@@ -555,7 +613,10 @@ def collect_hardware_rows(rows: list[dict]):
     cpu_system = [first_present(r, CPU_PATH_ALIASES['system_ms']) for r in rows]
     cpu_iowait = [first_present(r, CPU_PATH_ALIASES['iowait_ms']) for r in rows]
     cpu_context_switches = [first_present(r, CPU_PATH_ALIASES['context_switches']) for r in rows]
-    cpu_cores = [first_present(r, CPU_PATH_ALIASES['cores']) for r in rows]
+    cpu_cores = [
+    first_positive_present(r, CPU_PATH_ALIASES['cores'])
+    for r in rows]
+
 
     cpu_user_pct = pct_series_from_counter(cpu_user, rows)
     cpu_system_pct = pct_series_from_counter(cpu_system, rows)
@@ -650,7 +711,7 @@ def make_summary_from_rows(rows: list[dict]) -> dict:
         'first_top_end': ms_to_iso(first['end']),
         'last_top_start': ms_to_iso(last['start']),
         'last_top_end': ms_to_iso(last['end']),
-        'latency': latency_summary_rows(first, last),
+        'latency': latency_summary_rows(rows),
         'hardware': collect_hardware_rows(rows),
     }
 
@@ -683,14 +744,23 @@ def print_report(summary):
         print('Average latency per operation is derived from the cumulative `opLatencies` counters. '
               'MongoDB stores those counters in microseconds, but the report displays them in milliseconds. '
               'The window average reflects only operations that occurred during the captured timeframe.\n')
-        print('| Category | Ops in window | Throughput (ops/s) | Avg latency in window (ms) | Lifetime avg latency (ms) |')
-        print('| --- | ---: | ---: | ---: | ---: |')
+        print('| Category | Ops in window | Throughput (ops/s) | Avg latency in window (ms) | Max interval avg (ms) | Lifetime avg latency (ms) |')
+        print('| --- | ---: | ---: | ---: | ---: | ---: |')
+
         for cat in LATENCY_CATS:
             if cat not in lat:
                 continue
+
             d = lat[cat]
             tput = (d['delta_ops'] / elapsed) if elapsed else 0
-            print(f"| {cat} | {d['delta_ops']:,} | {tput:,.1f} | {_latency_ms(d['window_avg_us'])} | {_latency_ms(d['lifetime_avg_us'])} |")
+            print(
+                f"| {cat} | {d['delta_ops']:,} | {tput:,.1f} "
+                f"| {_latency_ms(d['window_avg_us'])} "
+                f"| {_latency_ms(d['max_interval_avg_us'])} "
+                f"| {_latency_ms(d['lifetime_avg_us'])} |"
+            )
+
+
 
     hw = summary['hardware']
     print('\n## Hardware & resource metrics\n')
