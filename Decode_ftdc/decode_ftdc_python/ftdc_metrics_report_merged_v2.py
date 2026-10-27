@@ -10,6 +10,7 @@ Supports:
  - an already-decoded JSON file (for parity testing / fallback)
 
 Reports are split at the first snapshot whose featureCompatibilityVersion is 8.0.
+Can be customised to include any event that is captured in FTDC Snapshots
 """
 
 from __future__ import annotations
